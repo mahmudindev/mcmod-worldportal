@@ -1,0 +1,7 @@
+{
+  "frame_top_right": "minecraft:iron_block",
+  "frame_top_left": "minecraft:gold_block",
+  "frame_bottom_right": "minecraft:gold_block",
+  "frame_bottom_left": "minecraft:iron_block",
+  "destination": "test:test"
+}

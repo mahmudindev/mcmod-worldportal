@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "package": "com.github.mahmudindev.minecraft.worldportal.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "client": [
+  ],
+  "mixins": [
+    "BaseFireBlockMixin",
+    "EntityHMixin",
+    "EntityMixin",
+    "PortalForcerLMixin",
+    "PortalForcerMixin",
+    "ServerLevelMixin",
+    "ServerPlayerHMixin",
+    "ServerPlayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
