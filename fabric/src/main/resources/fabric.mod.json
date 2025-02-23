@@ -16,10 +16,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.github.mahmudindev.minecraft.worldportal.fabric.WorldPortalFabric"
+      "com.github.mahmudindev.mcmod.worldportal.fabric.WorldPortalFabric"
     ],
     "client": [
-      "com.github.mahmudindev.minecraft.worldportal.fabric.client.WorldPortalFabricClient"
+      "com.github.mahmudindev.mcmod.worldportal.fabric.client.WorldPortalFabricClient"
     ]
   },
   "mixins": [

@@ -11,7 +11,7 @@ authors = "mahmudindev"
 description = '''
 Create custom world portal to travel between dimensions.
 '''
-#logoFile = ""
+logoFile = "assets/worldportal/icon.png"
 
 [[dependencies.worldportal]]
 modId = "forge"
