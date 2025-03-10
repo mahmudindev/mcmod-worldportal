@@ -43,11 +43,11 @@ public class PortalManager {
             }
 
             try {
-                String dimensionPath = resourcePath
+                String portalPath = resourcePath
                         .substring(resourcePath.lastIndexOf("/") + 1)
                         .replaceAll("\\.json$", "");
 
-                setPortal(resourceLocation.withPath(dimensionPath), gson.fromJson(
+                setPortal(resourceLocation.withPath(portalPath), gson.fromJson(
                         JsonParser.parseReader(resource.openAsReader()),
                         PortalData.class
                 ));

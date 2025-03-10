@@ -6,72 +6,68 @@ import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.PortalForcer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 @Mixin(PortalForcer.class)
 public abstract class PortalForcerMixin {
     @Shadow @Final private ServerLevel level;
 
-    @WrapOperation(
-            method = "findPortalAround",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;getInSquare(Ljava/util/function/Predicate;Lnet/minecraft/core/BlockPos;ILnet/minecraft/world/entity/ai/village/poi/PoiManager$Occupancy;)Ljava/util/stream/Stream;"
-            )
-    )
-    private Stream<PoiRecord> findPortalAroundPoiManagerGetInSquareFilter(
-            PoiManager instance,
-            Predicate<Holder<PoiType>> holderPredicate,
+    @WrapMethod(method = "findPortalAround")
+    private Optional<BlockUtil.FoundRectangle> findPortalAroundProcess(
             BlockPos blockPos,
-            int distance,
-            PoiManager.Occupancy occupancy,
-            Operation<Stream<PoiRecord>> original,
+            boolean isNether,
+            WorldBorder worldBorder,
+            Operation<Optional<BlockUtil.FoundRectangle>> original,
             @Share(
                     namespace = WorldPortal.MOD_ID + "_PortalForcer",
                     value = "virtualPos"
             ) LocalRef<BlockPos> virtualPosRef
     ) {
-        Stream<PoiRecord> poiRecordStream = original.call(
-                instance,
-                holderPredicate,
-                blockPos,
-                distance,
-                occupancy
-        );
-
         IServerLevel serverLevelX = (IServerLevel) this.level;
 
         PortalData portalData = serverLevelX.worldportal$getPortalInfoData(virtualPosRef.get());
         if (portalData != null) {
+            int searchRadius = isNether ? 16 : 128;
+
+            PoiManager poiManager = this.level.getPoiManager();
+            poiManager.ensureLoadedAndValid(this.level, blockPos, searchRadius);
+
             List<BlockUtil.FoundRectangle> portalRectangles = new LinkedList<>();
             Map<BlockPos, Boolean> portalCornerPasses = new HashMap<>();
 
-            return poiRecordStream.filter(poiRecord -> {
-                BlockPos blockPosZ = poiRecord.getPos();
+            Optional<PoiRecord> optional = poiManager.getInSquare(
+                    holder -> holder.is(PoiTypes.NETHER_PORTAL),
+                    blockPos,
+                    searchRadius,
+                    PoiManager.Occupancy.ANY
+            ).filter(poiRecord -> {
+                BlockPos blockPosX = poiRecord.getPos();
+
+                return worldBorder.isWithinBounds(blockPosX);
+            }).filter(poiRecord -> {
+                BlockPos blockPosX = poiRecord.getPos();
 
                 BlockUtil.FoundRectangle portalRectangle = null;
                 Direction.Axis axis = null;
@@ -86,31 +82,31 @@ public abstract class PortalForcerMixin {
 
                     axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
                     if (axis == Direction.Axis.X) {
-                        if (blockPosZ.getX() < minCornerPos.getX()) {
+                        if (blockPosX.getX() < minCornerPos.getX()) {
                             continue;
                         }
 
                         int axisSize = portalRectangleX.axis1Size;
-                        if (blockPosZ.getX() > minCornerPos.getX() + axisSize) {
+                        if (blockPosX.getX() > minCornerPos.getX() + axisSize) {
                             continue;
                         }
                     } else {
-                        if (blockPosZ.getZ() < minCornerPos.getZ()) {
+                        if (blockPosX.getZ() < minCornerPos.getZ()) {
                             continue;
                         }
 
                         int axisSize = portalRectangleX.axis1Size;
-                        if (blockPosZ.getZ() > minCornerPos.getZ() + axisSize - 1) {
+                        if (blockPosX.getZ() > minCornerPos.getZ() + axisSize - 1) {
                             continue;
                         }
                     }
 
-                    if (blockPosZ.getY() < minCornerPos.getY()) {
+                    if (blockPosX.getY() < minCornerPos.getY()) {
                         continue;
                     }
 
                     int axisSize = portalRectangleX.axis2Size;
-                    if (blockPosZ.getY() > minCornerPos.getY() + axisSize - 1) {
+                    if (blockPosX.getY() > minCornerPos.getY() + axisSize - 1) {
                         continue;
                     }
 
@@ -118,7 +114,7 @@ public abstract class PortalForcerMixin {
                 }
 
                 if (portalRectangle == null) {
-                    BlockState blockState = this.level.getBlockState(blockPosZ);
+                    BlockState blockState = this.level.getBlockState(blockPosX);
                     if (!blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
                         return false;
                     }
@@ -126,7 +122,7 @@ public abstract class PortalForcerMixin {
                     axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
                     portalRectangle = PortalManager.getPortalRectangle(
                             this.level,
-                            blockPosZ,
+                            blockPosX,
                             blockState,
                             axis
                     );
@@ -185,10 +181,43 @@ public abstract class PortalForcerMixin {
                 portalCornerPasses.put(portalRectangle.minCorner, true);
 
                 return true;
+            }).sorted(Comparator.comparingDouble((PoiRecord poiRecord) -> {
+                BlockPos blockPosX = poiRecord.getPos();
+
+                return blockPosX.distSqr(blockPos);
+            }).thenComparingInt(poiRecord -> {
+                BlockPos blockPosX = poiRecord.getPos();
+
+                return blockPosX.getY();
+            })).filter(poiRecord -> {
+                BlockPos blockPosX = poiRecord.getPos();
+                BlockState blockState = this.level.getBlockState(blockPosX);
+
+                return blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
+            }).findFirst();
+
+            return optional.map(poiRecord -> {
+                BlockPos blockPosX = poiRecord.getPos();
+
+                this.level.getChunkSource().addRegionTicket(
+                        TicketType.PORTAL,
+                        new ChunkPos(blockPosX),
+                        3,
+                        blockPosX
+                );
+
+                BlockState blockState = this.level.getBlockState(blockPosX);
+
+                return PortalManager.getPortalRectangle(
+                        this.level,
+                        blockPosX,
+                        this.level.getBlockState(blockPosX),
+                        blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS)
+                );
             });
         }
 
-        return poiRecordStream;
+        return original.call(blockPos, isNether,worldBorder);
     }
 
     @WrapMethod(method = "createPortal")
