@@ -22,7 +22,7 @@ public abstract class BaseFireBlockMixin {
                     target = "Lnet/minecraft/world/level/block/BaseFireBlock;inPortalDimension(Lnet/minecraft/world/level/Level;)Z"
             )
     )
-    private boolean onPlaceExtend(Level level, Operation<Boolean> original) {
+    private boolean onPlaceInPortalDimension(Level level, Operation<Boolean> original) {
         Boolean inPortalDimension = original.call(level);
 
         if (!inPortalDimension) {
@@ -34,9 +34,9 @@ public abstract class BaseFireBlockMixin {
                     break;
                 }
 
-                PortalData portalData = entry.getValue();
+                PortalData portal = entry.getValue();
 
-                if (portalData.getDestinationKey() != dimension) {
+                if (portal.getDestinationKey() != dimension) {
                     inPortalDimension = true;
                 }
             }

@@ -1,5 +1,6 @@
 package com.github.mahmudindev.mcmod.worldportal.config;
 
+import com.github.mahmudindev.mcmod.worldportal.WorldPortalExpectPlatform;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import com.google.gson.Gson;
@@ -14,36 +15,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Config {
+    private static final Path CONFIG_DIR = WorldPortalExpectPlatform.getConfigDir();
     private static Config CONFIG = new Config();
 
     private final Map<String, PortalData> portals = new HashMap<>();
 
     private void defaults() {
-        PortalData portalData = new PortalData();
-        portalData.setFrameTopRight("minecraft:iron_block");
-        portalData.setFrameTopLeft("minecraft:gold_block");
-        portalData.setFrameBottomRight("minecraft:gold_block");
-        portalData.setFrameBottomLeft("minecraft:iron_block");
-        portalData.setDestination(WorldPortal.MOD_ID + ":dimension");
-        this.portals.put(WorldPortal.MOD_ID + ":portal", portalData);
+        PortalData portal = new PortalData();
+        portal.setFrameTopRight("minecraft:iron_block");
+        portal.setFrameTopLeft("minecraft:gold_block");
+        portal.setFrameBottomRight("minecraft:gold_block");
+        portal.setFrameBottomLeft("minecraft:iron_block");
+        portal.setDestination(WorldPortal.MOD_ID + ":dimension");
+        this.portals.put(WorldPortal.MOD_ID + ":portal", portal);
     }
 
     public Map<String, PortalData> getPortals() {
         return Map.copyOf(this.portals);
     }
 
-    private static Path getPath() {
-        return WorldPortal.CONFIG_DIR.resolve(WorldPortal.MOD_ID + ".json");
-    }
-
-    private static File getFile() {
-        return getPath().toFile();
-    }
-
     public static void load() {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
 
-        File configFile = getFile();
+        File configFile = CONFIG_DIR.resolve(WorldPortal.MOD_ID + ".json").toFile();
         if (!configFile.exists()) {
             CONFIG.defaults();
 

@@ -29,7 +29,7 @@ public class PortalData {
             return null;
         }
 
-        return new ResourceLocation(id);
+        return ResourceLocation.parse(id);
     }
 
     public void setFrameTopRight(String frameTopRight) {
@@ -47,7 +47,7 @@ public class PortalData {
             return null;
         }
 
-        return new ResourceLocation(id);
+        return ResourceLocation.parse(id);
     }
 
     public void setFrameTopLeft(String frameTopLeft) {
@@ -65,7 +65,7 @@ public class PortalData {
             return null;
         }
 
-        return new ResourceLocation(id);
+        return ResourceLocation.parse(id);
     }
 
     public void setFrameBottomRight(String frameBottomRight) {
@@ -83,7 +83,7 @@ public class PortalData {
             return null;
         }
 
-        return new ResourceLocation(id);
+        return ResourceLocation.parse(id);
     }
 
     public void setFrameBottomLeft(String frameBottomLeft) {
@@ -95,7 +95,7 @@ public class PortalData {
     }
 
     public ResourceLocation getDestinationLocation() {
-        return new ResourceLocation(this.getDestination());
+        return ResourceLocation.parse(this.getDestination());
     }
 
     public ResourceKey<Level> getDestinationKey() {

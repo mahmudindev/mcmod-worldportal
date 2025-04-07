@@ -2,6 +2,7 @@ package com.github.mahmudindev.mcmod.worldportal.portal;
 
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -19,7 +20,7 @@ public class PortalReturns extends SavedData {
     private final Map<BlockPos, ResourceKey<Level>> dimensions = new HashMap<>();
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
+    public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
         ListTag listTag = new ListTag();
         this.dimensions.forEach((k, v) -> {
             CompoundTag compoundTagX = new CompoundTag();
@@ -49,6 +50,14 @@ public class PortalReturns extends SavedData {
         this.setDirty();
     }
 
+    public static SavedData.Factory<PortalReturns> factory() {
+        return new SavedData.Factory<>(
+                PortalReturns::new,
+                (compoundTag, provider) -> load(compoundTag),
+                null
+        );
+    }
+
     public static PortalReturns load(CompoundTag compoundTag) {
         PortalReturns portalReturns = new PortalReturns();
 
@@ -63,7 +72,7 @@ public class PortalReturns extends SavedData {
                     ),
                     ResourceKey.create(
                             Registries.DIMENSION,
-                            new ResourceLocation(compoundTagX.getString("Dimension"))
+                            ResourceLocation.parse(compoundTagX.getString("Dimension"))
                     )
             );
         }
