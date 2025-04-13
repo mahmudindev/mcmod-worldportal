@@ -1,7 +1,9 @@
 package com.github.mahmudindev.mcmod.worldportal.fabric;
 
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
@@ -34,5 +36,9 @@ public final class WorldPortalFabric implements ModInitializer {
                         WorldPortal.onResourceManagerReload(resourceManager);
                     }
                 });
+
+        PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
+            PortalManager.onPlayerBreakPortal(level, pos, state);
+        });
     }
 }

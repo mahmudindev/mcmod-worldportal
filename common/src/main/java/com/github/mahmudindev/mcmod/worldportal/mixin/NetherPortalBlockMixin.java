@@ -135,11 +135,7 @@ public abstract class NetherPortalBlockMixin {
             }
         }
 
-        portals.forEach((k, v) -> {
-            if (dimension == v.getDestinationKey()) {
-                portals.remove(k);
-            }
-        });
+        portals.keySet().removeIf(k -> dimension == portals.get(k).getDestinationKey());
 
         if (!portals.isEmpty()) {
             int random = serverLevel.getRandom().nextInt(portals.size());
