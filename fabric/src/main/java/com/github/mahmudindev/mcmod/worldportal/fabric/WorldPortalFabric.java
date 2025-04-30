@@ -4,7 +4,6 @@ import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -15,8 +14,6 @@ public final class WorldPortalFabric implements ModInitializer {
         // This code runs as soon as Minecraft is in a mod-load-ready state.
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
-
-        WorldPortal.CONFIG_DIR = FabricLoader.getInstance().getConfigDir();
 
         // Run our common setup.
         WorldPortal.init();

@@ -1,9 +1,8 @@
 package com.github.mahmudindev.mcmod.worldportal.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
-import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
+import com.github.mahmudindev.mcmod.worldportal.base.IPortalForcer;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.sugar.Share;
@@ -31,7 +30,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.*;
 
 @Mixin(PortalForcer.class)
-public abstract class PortalForcerMixin {
+public abstract class PortalForcerMixin implements IPortalForcer {
     @Shadow @Final private ServerLevel level;
 
     @WrapMethod(method = "findPortalAround")
@@ -45,17 +44,15 @@ public abstract class PortalForcerMixin {
                     value = "virtualPos"
             ) LocalRef<BlockPos> virtualPosRef
     ) {
-        IServerLevel serverLevelX = (IServerLevel) this.level;
-
-        PortalData portalData = serverLevelX.worldportal$getPortalInfoData(virtualPosRef.get());
-        if (portalData != null) {
+        PortalData portal = this.worldportal$getPortal(virtualPosRef.get());
+        if (portal != null) {
             int searchRadius = isNether ? 16 : 128;
 
             PoiManager poiManager = this.level.getPoiManager();
             poiManager.ensureLoadedAndValid(this.level, blockPos, searchRadius);
 
-            List<BlockUtil.FoundRectangle> portalRectangles = new LinkedList<>();
-            Map<BlockPos, Boolean> portalCornerPasses = new HashMap<>();
+            List<BlockUtil.FoundRectangle> foundRectangles = new LinkedList<>();
+            Map<BlockPos, Boolean> minCornerPassMap = new HashMap<>();
 
             Optional<PoiRecord> optional = poiManager.getInSquare(
                     holder -> holder.is(PoiTypes.NETHER_PORTAL),
@@ -69,11 +66,11 @@ public abstract class PortalForcerMixin {
             }).filter(poiRecord -> {
                 BlockPos blockPosX = poiRecord.getPos();
 
-                BlockUtil.FoundRectangle portalRectangle = null;
+                BlockUtil.FoundRectangle foundRectangle = null;
                 Direction.Axis axis = null;
 
-                for (BlockUtil.FoundRectangle portalRectangleX : portalRectangles) {
-                    BlockPos minCornerPos = portalRectangleX.minCorner;
+                for (BlockUtil.FoundRectangle foundRectangleX : foundRectangles) {
+                    BlockPos minCornerPos = foundRectangleX.minCorner;
 
                     BlockState blockState = this.level.getBlockState(minCornerPos);
                     if (!blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
@@ -86,7 +83,7 @@ public abstract class PortalForcerMixin {
                             continue;
                         }
 
-                        int axisSize = portalRectangleX.axis1Size;
+                        int axisSize = foundRectangleX.axis1Size;
                         if (blockPosX.getX() > minCornerPos.getX() + axisSize) {
                             continue;
                         }
@@ -95,7 +92,7 @@ public abstract class PortalForcerMixin {
                             continue;
                         }
 
-                        int axisSize = portalRectangleX.axis1Size;
+                        int axisSize = foundRectangleX.axis1Size;
                         if (blockPosX.getZ() > minCornerPos.getZ() + axisSize - 1) {
                             continue;
                         }
@@ -105,41 +102,43 @@ public abstract class PortalForcerMixin {
                         continue;
                     }
 
-                    int axisSize = portalRectangleX.axis2Size;
+                    int axisSize = foundRectangleX.axis2Size;
                     if (blockPosX.getY() > minCornerPos.getY() + axisSize - 1) {
                         continue;
                     }
 
-                    portalRectangle = portalRectangleX;
+                    foundRectangle = foundRectangleX;
                 }
 
-                if (portalRectangle == null) {
+                if (foundRectangle == null) {
                     BlockState blockState = this.level.getBlockState(blockPosX);
                     if (!blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
                         return false;
                     }
 
                     axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
-                    portalRectangle = PortalManager.getPortalRectangle(
-                            this.level,
+                    foundRectangle = BlockUtil.getLargestRectangleAround(
                             blockPosX,
-                            blockState,
-                            axis
+                            axis,
+                            21,
+                            Direction.Axis.Y,
+                            21,
+                            blockPosZ -> this.level.getBlockState(blockPosZ) == blockState
                     );
 
-                    portalRectangles.add(portalRectangle);
+                    foundRectangles.add(foundRectangle);
                 }
 
-                Boolean portalCornerPass = portalCornerPasses.get(portalRectangle.minCorner);
-                if (portalCornerPass != null) {
-                    return portalCornerPass;
+                Boolean minCornerPass = minCornerPassMap.get(foundRectangle.minCorner);
+                if (minCornerPass != null) {
+                    return minCornerPass;
                 }
 
-                portalCornerPasses.put(portalRectangle.minCorner, false);
+                minCornerPassMap.put(foundRectangle.minCorner, false);
 
-                ResourceLocation frameC1 = portalData.getFrameBottomLeftLocation();
+                ResourceLocation frameC1 = portal.getFrameBottomLeftLocation();
                 if (frameC1 != null && !BuiltInRegistries.BLOCK.getKey(
-                        this.level.getBlockState(portalRectangle.minCorner.offset(
+                        this.level.getBlockState(foundRectangle.minCorner.offset(
                                 axis == Direction.Axis.X ? -1 : 0,
                                 -1,
                                 axis == Direction.Axis.Z ? -1 : 0
@@ -147,38 +146,38 @@ public abstract class PortalForcerMixin {
                 ).equals(frameC1)) {
                     return false;
                 }
-                ResourceLocation frameC2 = portalData.getFrameBottomRightLocation();
+                ResourceLocation frameC2 = portal.getFrameBottomRightLocation();
                 if (frameC2 != null && !BuiltInRegistries.BLOCK.getKey(
-                        this.level.getBlockState(portalRectangle.minCorner.offset(
-                                axis == Direction.Axis.X ? portalRectangle.axis1Size : 0,
+                        this.level.getBlockState(foundRectangle.minCorner.offset(
+                                axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
                                 -1,
-                                axis == Direction.Axis.Z ? portalRectangle.axis1Size : 0
+                                axis == Direction.Axis.Z ? foundRectangle.axis1Size : 0
                         )).getBlock()
                 ).equals(frameC2)) {
                     return false;
                 }
-                ResourceLocation frameC3 = portalData.getFrameTopLeftLocation();
+                ResourceLocation frameC3 = portal.getFrameTopLeftLocation();
                 if (frameC3 != null && !BuiltInRegistries.BLOCK.getKey(
-                        this.level.getBlockState(portalRectangle.minCorner.offset(
+                        this.level.getBlockState(foundRectangle.minCorner.offset(
                                 axis == Direction.Axis.X ? -1 : 0,
-                                portalRectangle.axis2Size,
+                                foundRectangle.axis2Size,
                                 axis == Direction.Axis.Z ? -1 : 0
                         )).getBlock()
                 ).equals(frameC3)) {
                     return false;
                 }
-                ResourceLocation frameC4 = portalData.getFrameTopRightLocation();
+                ResourceLocation frameC4 = portal.getFrameTopRightLocation();
                 if (frameC4 != null && !BuiltInRegistries.BLOCK.getKey(
-                        this.level.getBlockState(portalRectangle.minCorner.offset(
-                                axis == Direction.Axis.X ? portalRectangle.axis1Size : 0,
-                                portalRectangle.axis2Size,
-                                axis == Direction.Axis.Z ? portalRectangle.axis1Size : 0
+                        this.level.getBlockState(foundRectangle.minCorner.offset(
+                                axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
+                                foundRectangle.axis2Size,
+                                axis == Direction.Axis.Z ? foundRectangle.axis1Size : 0
                         )).getBlock()
                 ).equals(frameC4)) {
                     return false;
                 }
 
-                portalCornerPasses.put(portalRectangle.minCorner, true);
+                minCornerPassMap.put(foundRectangle.minCorner, true);
 
                 return true;
             }).sorted(Comparator.comparingDouble((PoiRecord poiRecord) -> {
@@ -208,20 +207,22 @@ public abstract class PortalForcerMixin {
 
                 BlockState blockState = this.level.getBlockState(blockPosX);
 
-                return PortalManager.getPortalRectangle(
-                        this.level,
+                return BlockUtil.getLargestRectangleAround(
                         blockPosX,
-                        this.level.getBlockState(blockPosX),
-                        blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS)
+                        blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS),
+                        21,
+                        Direction.Axis.Y,
+                        21,
+                        blockPosZ -> this.level.getBlockState(blockPosZ) == blockState
                 );
             });
         }
 
-        return original.call(blockPos, isNether,worldBorder);
+        return original.call(blockPos, isNether, worldBorder);
     }
 
     @WrapMethod(method = "createPortal")
-    private Optional<BlockUtil.FoundRectangle> createPortalBuild(
+    private Optional<BlockUtil.FoundRectangle> createPortalProcess(
             BlockPos blockPos,
             Direction.Axis axis,
             Operation<Optional<BlockUtil.FoundRectangle>> original,
@@ -235,46 +236,44 @@ public abstract class PortalForcerMixin {
             return optional;
         }
 
-        IServerLevel serverLevelX = (IServerLevel) this.level;
+        PortalData portal = this.worldportal$getPortal(virtualPosRef.get());
+        if (portal != null) {
+            BlockUtil.FoundRectangle foundRectangle = optional.get();
 
-        PortalData portalData = serverLevelX.worldportal$getPortalInfoData(virtualPosRef.get());
-        if (portalData != null) {
-            BlockUtil.FoundRectangle portalRectangle = optional.get();
-
-            ResourceLocation frameC1 = portalData.getFrameBottomLeftLocation();
+            ResourceLocation frameC1 = portal.getFrameBottomLeftLocation();
             if (frameC1 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC1);
-                this.level.setBlockAndUpdate(portalRectangle.minCorner.offset(
+                this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
                         axis == Direction.Axis.X ? -1 : 0,
                         -1,
                         axis == Direction.Axis.Z ? -1 : 0
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC2 = portalData.getFrameBottomRightLocation();
+            ResourceLocation frameC2 = portal.getFrameBottomRightLocation();
             if (frameC2 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC2);
-                this.level.setBlockAndUpdate(portalRectangle.minCorner.offset(
-                        axis == Direction.Axis.X ? portalRectangle.axis1Size : 0,
+                this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
+                        axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
                         -1,
-                        axis == Direction.Axis.Z ? portalRectangle.axis1Size : 0
+                        axis == Direction.Axis.Z ? foundRectangle.axis1Size : 0
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC3 = portalData.getFrameTopLeftLocation();
+            ResourceLocation frameC3 = portal.getFrameTopLeftLocation();
             if (frameC3 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC3);
-                this.level.setBlockAndUpdate(portalRectangle.minCorner.offset(
+                this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
                         axis == Direction.Axis.X ? -1 : 0,
-                        portalRectangle.axis2Size,
+                        foundRectangle.axis2Size,
                         axis == Direction.Axis.Z ? -1 : 0
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC4 = portalData.getFrameTopRightLocation();
+            ResourceLocation frameC4 = portal.getFrameTopRightLocation();
             if (frameC4 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC4);
-                this.level.setBlockAndUpdate(portalRectangle.minCorner.offset(
-                        axis == Direction.Axis.X ? portalRectangle.axis1Size : 0,
-                        portalRectangle.axis2Size,
-                        axis == Direction.Axis.Z ? portalRectangle.axis1Size : 0
+                this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
+                        axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
+                        foundRectangle.axis2Size,
+                        axis == Direction.Axis.Z ? foundRectangle.axis1Size : 0
                 ), block.defaultBlockState());
             }
         }

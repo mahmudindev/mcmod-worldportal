@@ -12,8 +12,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,13 +24,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements IEntity {
     @Shadow protected BlockPos portalEntrancePos;
-    @Unique private PortalData portalEntranceData;
+    @Unique
+    private ResourceLocation portalId;
 
     @Shadow public abstract Level level();
 
@@ -52,105 +51,115 @@ public abstract class EntityMixin implements IEntity {
         }
 
         Direction.Axis axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
-        BlockUtil.FoundRectangle portalRectangle = PortalManager.getPortalRectangle(
-                level,
+        BlockUtil.FoundRectangle foundRectangle = BlockUtil.getLargestRectangleAround(
                 this.portalEntrancePos,
-                blockState,
-                axis
+                axis,
+                21,
+                Direction.Axis.Y,
+                21,
+                blockPosX -> level.getBlockState(blockPosX) == blockState
         );
 
-        BlockPos portalCornerPos = portalRectangle.minCorner;
+        BlockPos minCornerPos = foundRectangle.minCorner;
 
-        ResourceLocation portalL1 = BuiltInRegistries.BLOCK.getKey(
-                level.getBlockState(portalCornerPos.offset(
+        ResourceLocation frameC1 = BuiltInRegistries.BLOCK.getKey(
+                level.getBlockState(minCornerPos.offset(
                         axis == Direction.Axis.X ? -1 : 0,
                         -1,
                         axis == Direction.Axis.Z ? -1 : 0
                 )).getBlock()
         );
-        ResourceLocation portalL2 = BuiltInRegistries.BLOCK.getKey(
-                level.getBlockState(portalCornerPos.offset(
-                        axis == Direction.Axis.X ? portalRectangle.axis1Size : 0,
+        ResourceLocation frameC2 = BuiltInRegistries.BLOCK.getKey(
+                level.getBlockState(minCornerPos.offset(
+                        axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
                         -1,
-                        axis == Direction.Axis.Z ? portalRectangle.axis1Size : 0
+                        axis == Direction.Axis.Z ? foundRectangle.axis1Size : 0
                 )).getBlock()
         );
-        ResourceLocation portalL3 = BuiltInRegistries.BLOCK.getKey(
-                level.getBlockState(portalCornerPos.offset(
+        ResourceLocation frameC3 = BuiltInRegistries.BLOCK.getKey(
+                level.getBlockState(minCornerPos.offset(
                         axis == Direction.Axis.X ? -1 : 0,
-                        portalRectangle.axis2Size,
+                        foundRectangle.axis2Size,
                         axis == Direction.Axis.Z ? -1 : 0
                 )).getBlock()
         );
-        ResourceLocation portalL4 = BuiltInRegistries.BLOCK.getKey(
-                level.getBlockState(portalCornerPos.offset(
-                        axis == Direction.Axis.X ? portalRectangle.axis1Size : 0,
-                        portalRectangle.axis2Size,
-                        axis == Direction.Axis.Z ? portalRectangle.axis1Size : 0
+        ResourceLocation frameC4 = BuiltInRegistries.BLOCK.getKey(
+                level.getBlockState(minCornerPos.offset(
+                        axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
+                        foundRectangle.axis2Size,
+                        axis == Direction.Axis.Z ? foundRectangle.axis1Size : 0
                 )).getBlock()
         );
 
-        List<PortalData> portalDataList = new LinkedList<>();
+        Map<ResourceLocation, PortalData> portals = new HashMap<>();
 
         PortalManager.getPortals().forEach((k, v) -> {
-            ResourceLocation s1 = v.getFrameBottomLeftLocation();
-            if (s1 != null && !portalL1.equals(s1)) {
+            ResourceLocation c1 = v.getFrameBottomLeftLocation();
+            if (c1 != null && !frameC1.equals(c1)) {
                 return;
             }
 
-            ResourceLocation s2 = v.getFrameBottomRightLocation();
-            if (s2 != null && !portalL2.equals(s2)) {
+            ResourceLocation c2 = v.getFrameBottomRightLocation();
+            if (c2 != null && !frameC2.equals(c2)) {
                 return;
             }
 
-            ResourceLocation s3 = v.getFrameTopLeftLocation();
-            if (s3 != null && !portalL3.equals(s3)) {
+            ResourceLocation c3 = v.getFrameTopLeftLocation();
+            if (c3 != null && !frameC3.equals(c3)) {
                 return;
             }
 
-            ResourceLocation s4 = v.getFrameTopRightLocation();
-            if (s4 != null && !portalL4.equals(s4)) {
+            ResourceLocation c4 = v.getFrameTopRightLocation();
+            if (c4 != null && !frameC4.equals(c4)) {
                 return;
             }
 
-            portalDataList.add(v);
+            portals.put(k, v);
         });
 
-        IServerLevel serverLevelX = (IServerLevel) level;
-
         ResourceKey<Level> dimension = level.dimension();
+
+        IServerLevel serverLevelX = (IServerLevel) level;
         PortalReturns portalReturns = serverLevelX.worldportal$getPortalReturns();
 
-        if (!portalDataList.isEmpty()) {
-            ResourceKey<Level> returnDimension = portalReturns.getDimension(portalCornerPos);
+        if (!portals.isEmpty()) {
+            ResourceKey<Level> returnDimension = portalReturns.getDimension(minCornerPos);
             if (returnDimension != null) {
-                for (PortalData portalData : portalDataList) {
-                    if (dimension != portalData.getDestinationKey()) {
+                for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+                    if (dimension != entry.getValue().getDestinationKey()) {
                         continue;
                     }
 
-                    this.portalEntranceData = portalData;
+                    this.worldportal$setPortal(entry.getKey());
 
                     return returnDimension;
                 }
             }
         }
 
-        portalDataList.removeIf(portalData -> dimension == portalData.getDestinationKey());
+        portals.keySet().removeIf(k -> dimension == portals.get(k).getDestinationKey());
 
-        if (!portalDataList.isEmpty()) {
-            RandomSource random = level.getRandom();
-            PortalData portalData = portalDataList.get(random.nextInt(portalDataList.size()));
+        if (!portals.isEmpty()) {
+            int random = level.getRandom().nextInt(portals.size());
 
-            ResourceKey<Level> modified = portalData.getDestinationKey();
-            if (modified != null) {
-                this.portalEntranceData = portalData;
+            int i = 0;
+            for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+                if (i != random) {
+                    i++;
 
-                return modified;
+                    continue;
+                }
+
+                ResourceKey<Level> modified = entry.getValue().getDestinationKey();
+                if (modified != null) {
+                    this.worldportal$setPortal(entry.getKey());
+
+                    return modified;
+                }
             }
         }
 
-        portalReturns.removeDimension(portalCornerPos);
+        portalReturns.removeDimension(minCornerPos);
 
         return original;
     }
@@ -164,7 +173,7 @@ public abstract class EntityMixin implements IEntity {
             )
     )
     private void handleNetherPortalChangeDimensionAfter(CallbackInfo ci) {
-        this.portalEntranceData = null;
+        this.portalId = null;
     }
 
     @ModifyExpressionValue(
@@ -175,7 +184,7 @@ public abstract class EntityMixin implements IEntity {
             )
     )
     private ResourceKey<Level> findDimensionEntryPointEndKey(ResourceKey<Level> original) {
-        if (((IEntity) this).worldportal$getPortalEntranceData() != null) {
+        if (((IEntity) this).worldportal$getPortal() != null) {
             return null;
         }
 
@@ -192,27 +201,8 @@ public abstract class EntityMixin implements IEntity {
     private ResourceKey<Level> findDimensionEntryPointOverworldKey(
             ResourceKey<Level> original
     ) {
-        if (((IEntity) this).worldportal$getPortalEntranceData() != null) {
+        if (((IEntity) this).worldportal$getPortal() != null) {
             return null;
-        }
-
-        return original;
-    }
-
-    @ModifyExpressionValue(
-            method = "findDimensionEntryPoint",
-            at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/world/level/Level;NETHER:Lnet/minecraft/resources/ResourceKey;",
-                    ordinal = 0
-            )
-    )
-    private ResourceKey<Level> findDimensionEntryPointNetherKey0(
-            ResourceKey<Level> original,
-            ServerLevel serverLevel
-    ) {
-        if (((IEntity) this).worldportal$getPortalEntranceData() != null) {
-            return serverLevel.dimension();
         }
 
         return original;
@@ -227,7 +217,7 @@ public abstract class EntityMixin implements IEntity {
             )
     )
     private ResourceKey<Level> findDimensionEntryPointNetherKey1(ResourceKey<Level> original) {
-        if (((IEntity) this).worldportal$getPortalEntranceData() != null) {
+        if (((IEntity) this).worldportal$getPortal() != null) {
             return this.level().dimension();
         }
 
@@ -235,7 +225,17 @@ public abstract class EntityMixin implements IEntity {
     }
 
     @Override
-    public PortalData worldportal$getPortalEntranceData() {
-        return this.portalEntranceData;
+    public ResourceLocation worldportal$getPortalId() {
+        return this.portalId;
+    }
+
+    @Override
+    public PortalData worldportal$getPortal() {
+        return PortalManager.getPortal(this.worldportal$getPortalId());
+    }
+
+    @Override
+    public void worldportal$setPortal(ResourceLocation id) {
+        this.portalId = id;
     }
 }

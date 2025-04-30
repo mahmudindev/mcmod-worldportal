@@ -4,13 +4,8 @@ import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import com.github.mahmudindev.mcmod.worldportal.config.Config;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
-import net.minecraft.BlockUtil;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,17 +14,17 @@ import java.util.Map;
 public class PortalManager {
     private static final Map<ResourceLocation, PortalData> PORTALS = new HashMap<>();
 
-    public static void onResourceManagerReload(ResourceManager manager) {
+    public static void onResourceManagerReload(ResourceManager resourceManager) {
         PORTALS.clear();
 
         Config config = Config.getConfig();
-        config.getPortals().forEach((id, portalData) -> setPortal(
+        config.getPortals().forEach((id, portal) -> setPortal(
                 new ResourceLocation(id),
-                portalData
+                portal
         ));
 
         Gson gson = new Gson();
-        manager.listResources(
+        resourceManager.listResources(
                 WorldPortal.MOD_ID,
                 resourceLocation -> resourceLocation.getPath().endsWith(".json")
         ).forEach((resourceLocation, resource) -> {
@@ -44,7 +39,7 @@ public class PortalManager {
 
             try {
                 String portalPath = resourcePath
-                        .substring(resourcePath.lastIndexOf("/") + 1)
+                        .substring(resourcePath.indexOf("/") + 1)
                         .replaceAll("\\.json$", "");
 
                 setPortal(resourceLocation.withPath(portalPath), gson.fromJson(
@@ -61,23 +56,11 @@ public class PortalManager {
         return Map.copyOf(PORTALS);
     }
 
-    public static void setPortal(ResourceLocation id, PortalData portalData) {
-        PORTALS.put(id, portalData);
+    public static PortalData getPortal(ResourceLocation id) {
+        return PORTALS.get(id);
     }
 
-    public static BlockUtil.FoundRectangle getPortalRectangle(
-            Level level,
-            BlockPos portalPos,
-            BlockState blockState,
-            Direction.Axis axis
-    ) {
-        return BlockUtil.getLargestRectangleAround(
-                portalPos,
-                axis,
-                21,
-                Direction.Axis.Y,
-                21,
-                blockPos -> level.getBlockState(blockPos) == blockState
-        );
+    public static void setPortal(ResourceLocation id, PortalData portal) {
+        PORTALS.put(id, portal);
     }
 }

@@ -2,7 +2,6 @@ package com.github.mahmudindev.mcmod.worldportal.forge.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -51,13 +50,13 @@ public abstract class EntityMixin {
         );
 
         if (portalInfo != null) {
-            PortalData portalData = ((IEntity) this).worldportal$getPortalEntranceData();
-            if (portalData == null) {
+            PortalData portal = ((IEntity) this).worldportal$getPortal();
+            if (portal == null) {
                 return portalInfo;
             }
 
             ResourceKey<Level> dimension = serverLevel.dimension();
-            if (dimension != portalData.getDestinationKey()) {
+            if (dimension != portal.getDestinationKey()) {
                 return portalInfo;
             }
 
@@ -69,11 +68,13 @@ public abstract class EntityMixin {
             }
 
             Direction.Axis axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
-            BlockUtil.FoundRectangle portalRectangle = PortalManager.getPortalRectangle(
-                    serverLevel,
+            BlockUtil.FoundRectangle portalRectangle = BlockUtil.getLargestRectangleAround(
                     blockPos,
-                    blockState,
-                    axis
+                    axis,
+                    21,
+                    Direction.Axis.Y,
+                    21,
+                    blockPosX -> serverLevel.getBlockState(blockPosX) == blockState
             );
 
             IServerLevel serverLevelX = (IServerLevel) serverLevel;
@@ -106,17 +107,11 @@ public abstract class EntityMixin {
             Operation<Entity> original
     ) {
         Function<Boolean, Entity> modifiedRepositionEntity = (spawnPortal) -> {
-            Entity entityX = repositionEntity.apply(false);
-
-            if (spawnPortal) {
-                if (((IEntity) this).worldportal$getPortalEntranceData() != null) {
-                    return entityX;
-                }
-
-                ServerLevel.makeObsidianPlatform(destWorld);
+            if (((IEntity) this).worldportal$getPortal() != null) {
+                return repositionEntity.apply(false);
             }
 
-            return entityX;
+            return repositionEntity.apply(spawnPortal);
         };
 
         return original.call(

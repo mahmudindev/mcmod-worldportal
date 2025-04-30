@@ -1,7 +1,7 @@
 package com.github.mahmudindev.mcmod.worldportal.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
-import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
+import com.github.mahmudindev.mcmod.worldportal.base.IPortalForcer;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -25,21 +25,20 @@ public abstract class ServerPlayerHMixin {
                     target = "Lnet/minecraft/world/level/portal/PortalForcer;createPortal(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction$Axis;)Ljava/util/Optional;"
             )
     )
-    private Optional<BlockUtil.FoundRectangle> getExitPortalForcerPrepare(
+    private Optional<BlockUtil.FoundRectangle> getExitPortalForcerCreatePrepare(
             PortalForcer instance,
             BlockPos blockPos,
             Direction.Axis axis,
             Operation<Optional<BlockUtil.FoundRectangle>> original,
             ServerLevel serverLevel
     ) {
-        PortalData portalData = ((IEntity) this).worldportal$getPortalEntranceData();
-        if (portalData != null) {
-            IServerLevel serverLevelX = (IServerLevel) serverLevel;
+        PortalData portal = ((IEntity) this).worldportal$getPortal();
+        if (portal != null) {
+            IPortalForcer portalForcerX = (IPortalForcer) instance;
 
-            BlockPos blockPosX = serverLevelX.worldportal$setPortalInfo(
-                    serverLevel.dimension(),
+            BlockPos blockPosX = portalForcerX.worldportal$setPortal(
                     blockPos,
-                    portalData
+                    ((IEntity) this).worldportal$getPortalId()
             );
 
             Optional<BlockUtil.FoundRectangle> portalRectangle = original.call(
@@ -48,7 +47,7 @@ public abstract class ServerPlayerHMixin {
                     axis
             );
 
-            serverLevelX.worldportal$removePortalInfo(blockPosX);
+            portalForcerX.worldportal$removePortal(blockPosX);
 
             return portalRectangle;
         }

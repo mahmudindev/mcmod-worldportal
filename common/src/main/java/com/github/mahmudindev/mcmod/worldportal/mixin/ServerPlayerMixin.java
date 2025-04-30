@@ -20,7 +20,7 @@ public abstract class ServerPlayerMixin {
     private ResourceKey<Level> findDimensionEntryPointOverworldKey(
             ResourceKey<Level> original
     ) {
-        if (((IEntity) this).worldportal$getPortalEntranceData() != null) {
+        if (((IEntity) this).worldportal$getPortal() != null) {
             return null;
         }
 
@@ -35,7 +35,7 @@ public abstract class ServerPlayerMixin {
             )
     )
     private ResourceKey<Level> findDimensionEntryPointEndKey(ResourceKey<Level> original) {
-        if (((IEntity) this).worldportal$getPortalEntranceData() != null) {
+        if (((IEntity) this).worldportal$getPortal() != null) {
             return null;
         }
 
