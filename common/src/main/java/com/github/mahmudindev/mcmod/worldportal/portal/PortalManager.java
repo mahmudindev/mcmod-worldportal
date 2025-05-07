@@ -1,11 +1,19 @@
 package com.github.mahmudindev.mcmod.worldportal.portal;
 
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
+import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.config.Config;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
+import net.minecraft.BlockUtil;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -50,6 +58,26 @@ public class PortalManager {
                 WorldPortal.LOGGER.error("Failed to read datapack", e);
             }
         });
+    }
+
+    public static void onPlayerBreakPortal(Level level, BlockPos pos, BlockState state) {
+        if (!state.is(Blocks.NETHER_PORTAL)) {
+            return;
+        }
+
+        if (level instanceof IServerLevel serverLevelX) {
+            BlockUtil.FoundRectangle foundRectangle = BlockUtil.getLargestRectangleAround(
+                    pos,
+                    state.getValue(BlockStateProperties.HORIZONTAL_AXIS),
+                    21,
+                    Direction.Axis.Y,
+                    21,
+                    blockPos -> level.getBlockState(blockPos) == state
+            );
+
+            PortalReturns portalReturns = serverLevelX.worldportal$getPortalReturns();
+            portalReturns.removeDimension(foundRectangle.minCorner);
+        }
     }
 
     public static Map<ResourceLocation, PortalData> getPortals() {
