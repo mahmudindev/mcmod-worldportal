@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.function.Function;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin {
+public abstract class EntityMixin implements IEntity {
     @Shadow public abstract Level level();
 
     @WrapOperation(
@@ -50,7 +50,7 @@ public abstract class EntityMixin {
         );
 
         if (portalInfo != null) {
-            PortalData portal = ((IEntity) this).worldportal$getPortal();
+            PortalData portal = this.worldportal$getPortal();
             if (portal == null) {
                 return portalInfo;
             }
@@ -87,40 +87,5 @@ public abstract class EntityMixin {
         }
 
         return portalInfo;
-    }
-
-    @WrapOperation(
-            method = "changeDimension(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraftforge/common/util/ITeleporter;)Lnet/minecraft/world/entity/Entity;",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraftforge/common/util/ITeleporter;placeEntity(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/level/ServerLevel;FLjava/util/function/Function;)Lnet/minecraft/world/entity/Entity;"
-            ),
-            remap = false
-    )
-    private Entity changeDimensionEndPlatform(
-            ITeleporter instance,
-            Entity entity,
-            ServerLevel currentWorld,
-            ServerLevel destWorld,
-            float yaw,
-            Function<Boolean, Entity> repositionEntity,
-            Operation<Entity> original
-    ) {
-        Function<Boolean, Entity> modifiedRepositionEntity = (spawnPortal) -> {
-            if (((IEntity) this).worldportal$getPortal() != null) {
-                return repositionEntity.apply(false);
-            }
-
-            return repositionEntity.apply(spawnPortal);
-        };
-
-        return original.call(
-                instance,
-                entity,
-                currentWorld,
-                destWorld,
-                yaw,
-                modifiedRepositionEntity
-        );
     }
 }

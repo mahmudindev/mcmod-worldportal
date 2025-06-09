@@ -4,7 +4,6 @@ import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.BlockUtil;
@@ -22,7 +21,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin {
+public abstract class EntityMixin implements IEntity {
     @Shadow public abstract Level level();
 
     @WrapOperation(
@@ -40,7 +39,7 @@ public abstract class EntityMixin {
         PortalInfo portalInfo = original.call(instance, serverLevel);
 
         if (portalInfo != null) {
-            PortalData portal = ((IEntity) this).worldportal$getPortal();
+            PortalData portal = this.worldportal$getPortal();
             if (portal == null) {
                 return portalInfo;
             }
@@ -77,20 +76,5 @@ public abstract class EntityMixin {
         }
 
         return portalInfo;
-    }
-
-    @ModifyExpressionValue(
-            method = "changeDimension",
-            at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/world/level/Level;END:Lnet/minecraft/resources/ResourceKey;"
-            )
-    )
-    private ResourceKey<Level> changeDimensionEndPlatform(ResourceKey<Level> original) {
-        if (((IEntity) this).worldportal$getPortal() != null) {
-            return null;
-        }
-
-        return original;
     }
 }

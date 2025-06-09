@@ -4,7 +4,6 @@ import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.BlockUtil;
@@ -22,7 +21,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerMixin {
+public abstract class ServerPlayerMixin implements IEntity {
     @Shadow public abstract ServerLevel serverLevel();
 
     @WrapOperation(
@@ -40,7 +39,7 @@ public abstract class ServerPlayerMixin {
         PortalInfo portalInfo = original.call(instance, serverLevel);
 
         if (portalInfo != null) {
-            PortalData portal = ((IEntity) this).worldportal$getPortal();
+            PortalData portal = this.worldportal$getPortal();
             if (portal == null) {
                 return portalInfo;
             }
@@ -77,53 +76,5 @@ public abstract class ServerPlayerMixin {
         }
 
         return portalInfo;
-    }
-
-    @ModifyExpressionValue(
-            method = "changeDimension",
-            at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/world/level/Level;END:Lnet/minecraft/resources/ResourceKey;",
-                    ordinal = 0
-            )
-    )
-    private ResourceKey<Level> changeDimensionEndKey0(ResourceKey<Level> original) {
-        if (((IEntity) this).worldportal$getPortal() != null) {
-            return null;
-        }
-
-        return original;
-    }
-
-    @ModifyExpressionValue(
-            method = "changeDimension",
-            at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/world/level/Level;OVERWORLD:Lnet/minecraft/resources/ResourceKey;",
-                    ordinal = 0
-            )
-    )
-    private ResourceKey<Level> changeDimensionOverworldKey0(ResourceKey<Level> original) {
-        if (((IEntity) this).worldportal$getPortal() != null) {
-            return null;
-        }
-
-        return original;
-    }
-
-    @ModifyExpressionValue(
-            method = "changeDimension",
-            at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/world/level/Level;END:Lnet/minecraft/resources/ResourceKey;",
-                    ordinal = 1
-            )
-    )
-    private ResourceKey<Level> changeDimensionEndPlatform(ResourceKey<Level> original) {
-        if (((IEntity) this).worldportal$getPortal() != null) {
-            return null;
-        }
-
-        return original;
     }
 }

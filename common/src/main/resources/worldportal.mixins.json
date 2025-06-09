@@ -6,14 +6,14 @@
   "client": [
   ],
   "mixins": [
-    "BaseFireBlockMixin",
-    "EntityHMixin",
+    "BaseFireBlockLMixin",
+    "BlockPosMixin",
     "EntityMixin",
+    "EntityLMixin",
     "PortalForcerLMixin",
-    "PortalForcerMixin",
     "ServerLevelMixin",
-    "ServerPlayerHMixin",
-    "ServerPlayerMixin"
+    "ServerPlayerMixin",
+    "ServerPlayerLMixin"
   ],
   "injectors": {
     "defaultRequire": 1

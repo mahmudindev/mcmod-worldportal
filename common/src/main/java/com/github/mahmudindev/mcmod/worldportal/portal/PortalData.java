@@ -15,7 +15,6 @@ public class PortalData {
     private String frameBottomRight;
     @SerializedName("frame_bottom_left")
     private String frameBottomLeft;
-    @SerializedName("destination")
     private String destination;
 
     public String getFrameTopRight() {
