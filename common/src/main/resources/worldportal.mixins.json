@@ -6,12 +6,12 @@
   "client": [
   ],
   "mixins": [
-    "BaseFireBlockMixin",
+    "BaseFireBlockLMixin",
+    "BlockPosMixin",
     "EntityMixin",
-    "NetherPortalBlockHMixin",
     "NetherPortalBlockMixin",
+    "NetherPortalBlockLMixin",
     "PortalForcerLMixin",
-    "PortalForcerMixin",
     "ServerLevelMixin"
   ],
   "injectors": {
