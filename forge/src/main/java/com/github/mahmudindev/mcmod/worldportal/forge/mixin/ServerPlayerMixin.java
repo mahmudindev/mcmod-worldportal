@@ -64,16 +64,15 @@ public abstract class ServerPlayerMixin implements IEntity {
             BlockPos blockPos = BlockPos.containing(portalInfo.pos);
 
             BlockState blockState = serverLevel.getBlockState(blockPos);
-            if (!blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
-                return portalInfo;
-            }
-
-            Direction.Axis axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
+            boolean hasHA = blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
+            Direction.Axis axis = hasHA
+                    ? blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS)
+                    : Direction.Axis.X;
             BlockUtil.FoundRectangle portalRectangle = BlockUtil.getLargestRectangleAround(
                     blockPos,
                     axis,
                     21,
-                    Direction.Axis.Y,
+                    hasHA ? Direction.Axis.Y : Direction.Axis.X,
                     21,
                     blockPosX -> serverLevel.getBlockState(blockPosX) == blockState
             );

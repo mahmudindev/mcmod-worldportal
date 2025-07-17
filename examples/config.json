@@ -1,11 +1,20 @@
 {
   "portals": {
     "minecraft:example": {
-      "frame_top_right": "minecraft:iron_block",
-      "frame_top_left": "minecraft:gold_block",
-      "frame_bottom_right": "minecraft:gold_block",
-      "frame_bottom_left": "minecraft:iron_block",
+      "frame_top_right": "minecraft:gold_block",
+      "frame_top_left": "minecraft:iron_block",
+      "frame_bottom_right": "minecraft:iron_block",
+      "frame_bottom_left": "minecraft:gold_block",
+      "mode": "worldportal:default",
       "destination": "customdimension:dimension"
+    },
+    "minecraft:example_horizontal": {
+      "frame_top_right": "minecraft:gold_block",
+      "frame_top_left": "minecraft:iron_block",
+      "frame_bottom_right": "minecraft:iron_block",
+      "frame_bottom_left": "minecraft:gold_block",
+      "mode": "worldportal:horizontal",
+      "destination": "customdimension:dimension_flat"
     }
   }
 }

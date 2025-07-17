@@ -7,13 +7,16 @@
   ],
   "mixins": [
     "BaseFireBlockLMixin",
+    "BaseFireBlockMixin",
+    "BlockBehaviourMixin",
     "BlockPosMixin",
-    "EntityMixin",
+    "EndPortalBlockMixin",
     "EntityLMixin",
+    "EntityMixin",
     "PortalForcerLMixin",
     "ServerLevelMixin",
-    "ServerPlayerMixin",
-    "ServerPlayerLMixin"
+    "ServerPlayerLMixin",
+    "ServerPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

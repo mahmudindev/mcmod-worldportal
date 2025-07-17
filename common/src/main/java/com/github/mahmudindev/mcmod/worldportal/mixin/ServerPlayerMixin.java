@@ -5,10 +5,13 @@ import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.PortalForcer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +19,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.Optional;
 
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerMixin implements IEntity {
+public abstract class ServerPlayerMixin extends Player implements IEntity {
+    public ServerPlayerMixin(
+            Level level,
+            BlockPos blockPos,
+            float f,
+            GameProfile gameProfile
+    ) {
+        super(level, blockPos, f, gameProfile);
+    }
+
     @WrapOperation(
             method = "getExitPortal",
             at = @At(
@@ -32,6 +44,8 @@ public abstract class ServerPlayerMixin implements IEntity {
     ) {
         PortalData portal = this.worldportal$getPortal();
         if (portal != null) {
+            ((IBlockPos) blockPos).worldportal$setLevel(this.level());
+            ((IBlockPos) blockPos).worldportal$setPortalEntrancePos(this.portalEntrancePos);
             ((IBlockPos) blockPos).worldportal$setPortal(this.worldportal$getPortalId());
         }
 

@@ -33,6 +33,11 @@ public abstract class BaseFireBlockLMixin {
 
                 PortalData portal = entry.getValue();
 
+                ResourceLocation mode = portal.getModeLocation();
+                if (mode != null && !mode.equals(PortalData.DEFAULT_MODE)) {
+                    continue;
+                }
+
                 if (portal.getDestinationKey() != level.dimension()) {
                     inPortalDimension = true;
                 }
