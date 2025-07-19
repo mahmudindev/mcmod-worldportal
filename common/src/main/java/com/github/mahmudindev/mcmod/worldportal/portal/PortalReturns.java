@@ -36,6 +36,10 @@ public class PortalReturns extends SavedData {
         return compoundTag;
     }
 
+    public Map<BlockPos, ResourceKey<Level>> getDimensions() {
+        return Map.copyOf(this.dimensions);
+    }
+
     public ResourceKey<Level> getDimension(BlockPos pos) {
         return this.dimensions.get(pos);
     }

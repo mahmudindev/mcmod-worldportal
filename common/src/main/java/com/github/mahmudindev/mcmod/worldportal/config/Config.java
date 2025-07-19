@@ -21,13 +21,23 @@ public class Config {
     private final Map<String, PortalData> portals = new HashMap<>();
 
     private void defaults() {
-        PortalData portal = new PortalData();
-        portal.setFrameTopRight("minecraft:iron_block");
-        portal.setFrameTopLeft("minecraft:gold_block");
-        portal.setFrameBottomRight("minecraft:gold_block");
-        portal.setFrameBottomLeft("minecraft:iron_block");
-        portal.setDestination(WorldPortal.MOD_ID + ":dimension");
-        this.portals.put(WorldPortal.MOD_ID + ":portal", portal);
+        PortalData portal0 = new PortalData();
+        portal0.setFrameTopRight("minecraft:gold_block");
+        portal0.setFrameTopLeft("minecraft:iron_block");
+        portal0.setFrameBottomRight("minecraft:iron_block");
+        portal0.setFrameBottomLeft("minecraft:gold_block");
+        portal0.setMode(String.valueOf(PortalData.DEFAULT_MODE));
+        portal0.setDestination(WorldPortal.MOD_ID + ":dimension");
+        this.portals.put(WorldPortal.MOD_ID + ":default", portal0);
+
+        PortalData portal1 = new PortalData();
+        portal1.setFrameTopRight("minecraft:gold_block");
+        portal1.setFrameTopLeft("minecraft:iron_block");
+        portal1.setFrameBottomRight("minecraft:iron_block");
+        portal1.setFrameBottomLeft("minecraft:gold_block");
+        portal1.setMode(String.valueOf(PortalData.DEFAULT_MODE));
+        portal1.setDestination(WorldPortal.MOD_ID + ":dimension");
+        this.portals.put(WorldPortal.MOD_ID + ":horizontal", portal1);
     }
 
     public Map<String, PortalData> getPortals() {

@@ -10,6 +10,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +25,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements IEntity {
@@ -56,16 +60,15 @@ public abstract class EntityMixin implements IEntity {
             BlockPos blockPos = BlockPos.containing(dimensionTransition.pos());
 
             BlockState blockState = serverLevel.getBlockState(blockPos);
-            if (!blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
-                return original.call(instance, dimensionTransition);
-            }
-
-            Direction.Axis axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
+            boolean hasHA = blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
+            Direction.Axis axis = hasHA
+                    ? blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS)
+                    : Direction.Axis.X;
             BlockUtil.FoundRectangle foundRectangle = BlockUtil.getLargestRectangleAround(
                     blockPos,
                     axis,
                     21,
-                    Direction.Axis.Y,
+                    hasHA ? Direction.Axis.Y : Direction.Axis.X,
                     21,
                     blockPosX -> serverLevel.getBlockState(blockPosX) == blockState
             );
@@ -98,7 +101,170 @@ public abstract class EntityMixin implements IEntity {
     }
 
     @Override
-    public void worldportal$setPortal(ResourceLocation id) {
-        this.portalId = id;
+    public void worldportal$setPortal(ResourceLocation portalId) {
+        this.portalId = portalId;
+    }
+
+    @Override
+    public ResourceKey<Level> worldportal$setupPortal(
+            BlockPos blockPos,
+            ResourceKey<Level> originalKey
+    ) {
+        Level level = this.level();
+
+        BlockState blockState = level.getBlockState(blockPos);
+        boolean hasHA = blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
+        Direction.Axis axis = hasHA
+                ? blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS)
+                : Direction.Axis.X;
+        BlockUtil.FoundRectangle foundRectangle = BlockUtil.getLargestRectangleAround(
+                blockPos,
+                axis,
+                21,
+                hasHA ? Direction.Axis.Y : Direction.Axis.Z,
+                21,
+                blockPosX -> level.getBlockState(blockPosX) == blockState
+        );
+
+        BlockPos minCornerPos = foundRectangle.minCorner;
+
+        ResourceLocation frameC1 = BuiltInRegistries.BLOCK.getKey(
+                level.getBlockState(minCornerPos.offset(
+                        axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
+                        hasHA ? -1 : 0,
+                        hasHA ? axis == Direction.Axis.Z ? foundRectangle.axis1Size : 0 : -1
+                )).getBlock()
+        );
+        ResourceLocation frameC2 = BuiltInRegistries.BLOCK.getKey(
+                level.getBlockState(minCornerPos.offset(
+                        axis == Direction.Axis.X ? -1 : 0,
+                        hasHA ? -1 : 0,
+                        hasHA && axis != Direction.Axis.Z ? 0 : -1
+                )).getBlock()
+        );
+        ResourceLocation frameC3 = BuiltInRegistries.BLOCK.getKey(
+                level.getBlockState(minCornerPos.offset(
+                        axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
+                        hasHA ? foundRectangle.axis2Size : 0,
+                        hasHA ? axis == Direction.Axis.Z
+                                ? foundRectangle.axis1Size
+                                : 0 : foundRectangle.axis2Size
+                )).getBlock()
+        );
+        ResourceLocation frameC4 = BuiltInRegistries.BLOCK.getKey(
+                level.getBlockState(minCornerPos.offset(
+                        axis == Direction.Axis.X ? -1 : 0,
+                        hasHA ? foundRectangle.axis2Size : 0,
+                        hasHA ? axis == Direction.Axis.Z ? -1 : 0 : foundRectangle.axis2Size
+                )).getBlock()
+        );
+
+        Map<ResourceLocation, PortalData> portals = new HashMap<>();
+
+        PortalManager.getPortals().forEach((k, v) -> {
+            ResourceLocation mode = v.getModeLocation();
+            if (hasHA) {
+                if (mode != null && !mode.equals(PortalData.DEFAULT_MODE)) {
+                    return;
+                }
+            } else {
+                if (mode == null || !mode.equals(PortalData.HORIZONTAL_MODE)) {
+                    return;
+                }
+            }
+
+            ResourceLocation c1 = v.getFrameBottomLeftLocation();
+            if (c1 != null && !frameC1.equals(c1)) {
+                return;
+            }
+
+            ResourceLocation c2 = v.getFrameBottomRightLocation();
+            if (c2 != null && !frameC2.equals(c2)) {
+                return;
+            }
+
+            ResourceLocation c3 = v.getFrameTopLeftLocation();
+            if (c3 != null && !frameC3.equals(c3)) {
+                return;
+            }
+
+            ResourceLocation c4 = v.getFrameTopRightLocation();
+            if (c4 != null && !frameC4.equals(c4)) {
+                return;
+            }
+
+            portals.put(k, v);
+        });
+
+        ResourceKey<Level> resourceKeyX = level.dimension();
+
+        IServerLevel serverLevelX = (IServerLevel) level;
+        PortalReturns portalReturns = serverLevelX.worldportal$getPortalReturns();
+
+        if (!portals.isEmpty()) {
+            ResourceKey<Level> resourceKeyZ = portalReturns.getDimension(minCornerPos);
+            if (resourceKeyZ != null) {
+                for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+                    ResourceKey<Level> resourceKeyV = entry.getValue().getDestinationKey();
+                    if (resourceKeyX != resourceKeyV) {
+                        continue;
+                    }
+
+                    this.worldportal$setPortal(entry.getKey());
+
+                    return resourceKeyZ;
+                }
+            }
+
+            Map<BlockPos, ResourceKey<Level>> dimensions = portalReturns.getDimensions();
+            for (Map.Entry<BlockPos, ResourceKey<Level>> entry : dimensions.entrySet()) {
+                BlockPos minCornerPosX = entry.getKey();
+                if (blockPos.distSqr(minCornerPosX) > 128) {
+                    continue;
+                }
+
+                ResourceKey<Level> resourceKeyB = entry.getValue();
+
+                for (Map.Entry<ResourceLocation, PortalData> entryX : portals.entrySet()) {
+                    ResourceKey<Level> resourceKeyA = entryX.getValue().getDestinationKey();
+                    if (resourceKeyX != resourceKeyA) {
+                        continue;
+                    }
+
+                    portalReturns.putDimension(minCornerPos, resourceKeyB);
+                    portalReturns.removeDimension(minCornerPosX);
+
+                    this.worldportal$setPortal(entryX.getKey());
+
+                    return resourceKeyB;
+                }
+            }
+        }
+
+        portals.keySet().removeIf(k -> resourceKeyX == portals.get(k).getDestinationKey());
+
+        if (!portals.isEmpty()) {
+            int random = level.getRandom().nextInt(portals.size());
+
+            int i = 0;
+            for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+                if (i != random) {
+                    i++;
+
+                    continue;
+                }
+
+                ResourceKey<Level> resourceKeyZ = entry.getValue().getDestinationKey();
+                if (resourceKeyZ != null) {
+                    this.worldportal$setPortal(entry.getKey());
+
+                    return resourceKeyZ;
+                }
+            }
+        }
+
+        portalReturns.removeDimension(minCornerPos);
+
+        return hasHA ? originalKey : null;
     }
 }

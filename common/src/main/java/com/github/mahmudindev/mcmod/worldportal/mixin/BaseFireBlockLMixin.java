@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.Map;
 
-@Mixin(value = BaseFireBlock.class, priority = 759)
+@Mixin(value = BaseFireBlock.class, priority = 750)
 public abstract class BaseFireBlockLMixin {
     @WrapOperation(
             method = "onPlace",
@@ -32,6 +32,11 @@ public abstract class BaseFireBlockLMixin {
                 }
 
                 PortalData portal = entry.getValue();
+
+                ResourceLocation mode = portal.getModeLocation();
+                if (mode != null && !mode.equals(PortalData.DEFAULT_MODE)) {
+                    continue;
+                }
 
                 if (portal.getDestinationKey() != level.dimension()) {
                     inPortalDimension = true;

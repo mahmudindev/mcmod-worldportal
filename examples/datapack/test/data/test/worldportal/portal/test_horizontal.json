@@ -3,6 +3,6 @@
   "frame_top_left": "minecraft:iron_block",
   "frame_bottom_right": "minecraft:iron_block",
   "frame_bottom_left": "minecraft:gold_block",
-  "mode": "worldportal:default",
-  "destination": "test:test"
+  "mode": "worldportal:horizontal",
+  "destination": "test:test_flat"
 }

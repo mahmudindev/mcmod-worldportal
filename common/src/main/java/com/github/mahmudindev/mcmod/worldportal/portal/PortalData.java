@@ -1,5 +1,6 @@
 package com.github.mahmudindev.mcmod.worldportal.portal;
 
+import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import com.google.gson.annotations.SerializedName;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -7,6 +8,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 public class PortalData {
+    public static final ResourceLocation DEFAULT_MODE = ResourceLocation.tryBuild(
+            WorldPortal.MOD_ID,
+            "default"
+    );
+    public static final ResourceLocation HORIZONTAL_MODE = ResourceLocation.tryBuild(
+            WorldPortal.MOD_ID,
+            "horizontal"
+    );
+
     @SerializedName("frame_top_right")
     private String frameTopRight;
     @SerializedName("frame_top_left")
@@ -15,6 +25,7 @@ public class PortalData {
     private String frameBottomRight;
     @SerializedName("frame_bottom_left")
     private String frameBottomLeft;
+    private String mode;
     private String destination;
 
     public String getFrameTopRight() {
@@ -87,6 +98,24 @@ public class PortalData {
 
     public void setFrameBottomLeft(String frameBottomLeft) {
         this.frameBottomLeft = frameBottomLeft;
+    }
+
+    public String getMode() {
+        return this.mode;
+    }
+
+    public ResourceLocation getModeLocation() {
+        String id = this.getMode();
+
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
+
+        return ResourceLocation.parse(id);
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 
     public String getDestination() {

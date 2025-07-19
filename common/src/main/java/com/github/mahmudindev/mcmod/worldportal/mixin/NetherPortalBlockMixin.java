@@ -34,12 +34,15 @@ public abstract class NetherPortalBlockMixin {
             WorldBorder worldBorder,
             Operation<Optional<BlockPos>> original,
             ServerLevel serverLevel,
-            Entity entity
+            Entity entity,
+            BlockPos blockPos2
     ) {
         IEntity entityX = (IEntity) entity;
 
         PortalData portal = entityX.worldportal$getPortal();
         if (portal != null) {
+            ((IBlockPos) blockPos).worldportal$setLevel(entity.level());
+            ((IBlockPos) blockPos).worldportal$setPortalEntrancePos(blockPos2);
             ((IBlockPos) blockPos).worldportal$setPortal(entityX.worldportal$getPortalId());
         }
 
@@ -59,12 +62,15 @@ public abstract class NetherPortalBlockMixin {
             Direction.Axis axis,
             Operation<Optional<BlockUtil.FoundRectangle>> original,
             ServerLevel serverLevel,
-            Entity entity
+            Entity entity,
+            BlockPos blockPos2
     ) {
         IEntity entityX = (IEntity) entity;
 
         PortalData portal = entityX.worldportal$getPortal();
         if (portal != null) {
+            ((IBlockPos) blockPos).worldportal$setLevel(entity.level());
+            ((IBlockPos) blockPos).worldportal$setPortalEntrancePos(blockPos2);
             ((IBlockPos) blockPos).worldportal$setPortal(entityX.worldportal$getPortalId());
         }
 

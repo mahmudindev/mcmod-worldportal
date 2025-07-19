@@ -16,7 +16,7 @@ logoFile = "assets/worldportal/icon.png"
 [[dependencies.worldportal]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21,)"
+versionRange = "[21.0,)"
 ordering = "NONE"
 side = "BOTH"
 

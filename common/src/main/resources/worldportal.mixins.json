@@ -7,10 +7,13 @@
   ],
   "mixins": [
     "BaseFireBlockLMixin",
+    "BaseFireBlockMixin",
+    "BlockBehaviourMixin",
     "BlockPosMixin",
+    "EndPortalBlockMixin",
     "EntityMixin",
-    "NetherPortalBlockMixin",
     "NetherPortalBlockLMixin",
+    "NetherPortalBlockMixin",
     "PortalForcerLMixin",
     "ServerLevelMixin"
   ],
