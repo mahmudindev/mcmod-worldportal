@@ -96,8 +96,7 @@ public abstract class NetherPortalBlockLMixin {
             at = @At(
                     value = "NEW",
                     target = "net/minecraft/world/phys/Vec3"
-            ),
-            remap = false
+            )
     )
     private static Vec3 method30331HorizontalPortal(
             double d,
