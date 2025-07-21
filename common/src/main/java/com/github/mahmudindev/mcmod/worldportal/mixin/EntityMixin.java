@@ -18,7 +18,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -40,24 +40,24 @@ public abstract class EntityMixin implements IEntity {
             method = "handlePortal",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;changeDimension(Lnet/minecraft/world/level/portal/DimensionTransition;)Lnet/minecraft/world/entity/Entity;"
+                    target = "Lnet/minecraft/world/entity/Entity;teleport(Lnet/minecraft/world/level/portal/TeleportTransition;)Lnet/minecraft/world/entity/Entity;"
             )
     )
     private Entity handlePortalChangeDimensionFinish(
             Entity instance,
-            DimensionTransition dimensionTransition,
+            TeleportTransition teleportTransition,
             Operation<Entity> original
     ) {
         PortalData portal = this.worldportal$getPortal();
         if (portal != null) {
-            ServerLevel serverLevel = dimensionTransition.newLevel();
+            ServerLevel serverLevel = teleportTransition.newLevel();
 
             ResourceKey<Level> dimension = serverLevel.dimension();
             if (dimension != portal.getDestinationKey()) {
-                return original.call(instance, dimensionTransition);
+                return original.call(instance, teleportTransition);
             }
 
-            BlockPos blockPos = BlockPos.containing(dimensionTransition.pos());
+            BlockPos blockPos = BlockPos.containing(teleportTransition.position());
 
             BlockState blockState = serverLevel.getBlockState(blockPos);
             boolean hasHA = blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
@@ -82,7 +82,7 @@ public abstract class EntityMixin implements IEntity {
             );
         }
 
-        return original.call(instance, dimensionTransition);
+        return original.call(instance, teleportTransition);
     }
 
     @Inject(method = "handlePortal", at = @At(value = "RETURN"))

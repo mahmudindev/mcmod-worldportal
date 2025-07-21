@@ -3,7 +3,10 @@ package com.github.mahmudindev.mcmod.worldportal.mixin;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,14 +22,20 @@ public abstract class BlockBehaviourMixin {
     @Inject(method = "updateShape", at = @At("TAIL"), cancellable = true)
     private void updateShapeHorizontalPortal(
             BlockState blockState,
-            Direction direction,
-            BlockState blockState2,
-            LevelAccessor levelAccessor,
+            LevelReader levelReader,
+            ScheduledTickAccess scheduledTickAccess,
             BlockPos blockPos,
+            Direction direction,
             BlockPos blockPos2,
+            BlockState blockState2,
+            RandomSource randomSource,
             CallbackInfoReturnable<BlockState> cir
     ) {
         if (!blockState.is(Blocks.END_PORTAL)) {
+            return;
+        }
+
+        if (!(levelReader instanceof LevelAccessor levelAccessor)) {
             return;
         }
 
