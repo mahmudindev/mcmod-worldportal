@@ -98,7 +98,7 @@ public abstract class NetherPortalBlockLMixin {
                     target = "net/minecraft/world/phys/Vec3"
             )
     )
-    private static Vec3 method30331HorizontalPortal(
+    private static Vec3 getDimensionTransitionFromExitHorizontalPortal(
             double d,
             double e,
             double f,

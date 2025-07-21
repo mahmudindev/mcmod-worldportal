@@ -11,6 +11,7 @@
     "BlockBehaviourMixin",
     "BlockPosMixin",
     "EndPortalBlockMixin",
+    "EntityLMixin",
     "EntityMixin",
     "NetherPortalBlockLMixin",
     "NetherPortalBlockMixin",
