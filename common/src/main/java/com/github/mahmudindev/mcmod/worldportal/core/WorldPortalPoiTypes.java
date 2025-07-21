@@ -17,7 +17,7 @@ public class WorldPortalPoiTypes {
     );
 
     public static void bootstrap() {
-        if (BuiltInRegistries.POINT_OF_INTEREST_TYPE.get(END_PORTAL) == null) {
+        if (BuiltInRegistries.POINT_OF_INTEREST_TYPE.getValue(END_PORTAL) == null) {
             WorldPortalExpectPlatform.registerPoiType(
                     END_PORTAL,
                     Set.copyOf(Blocks.END_PORTAL.getStateDefinition().getPossibleStates()),

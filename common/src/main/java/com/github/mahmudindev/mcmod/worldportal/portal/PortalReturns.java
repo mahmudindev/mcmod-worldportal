@@ -1,39 +1,57 @@
 package com.github.mahmudindev.mcmod.worldportal.portal;
 
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PortalReturns extends SavedData {
-    public static String FIELD = WorldPortal.MOD_ID + "_returns";
-
-    private final Map<BlockPos, ResourceKey<Level>> dimensions = new HashMap<>();
-
-    @Override
-    public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        ListTag listTag = new ListTag();
-        this.dimensions.forEach((k, v) -> {
-            CompoundTag compoundTagX = new CompoundTag();
-            compoundTagX.putInt("PosX", k.getX());
-            compoundTagX.putInt("PosY", k.getY());
-            compoundTagX.putInt("PosZ", k.getZ());
-            compoundTagX.putString("Dimension", String.valueOf(v.location()));
-
-            listTag.add(compoundTagX);
+    public static final Codec<PortalReturns> CODEC = RecordCodecBuilder.create(instance -> {
+        return instance.group(
+                PortalReturn.CODEC.listOf().fieldOf("Dimensions").forGetter(v -> {
+                    List<PortalReturn> portalReturns = new ArrayList<>();
+                    v.dimensions.forEach((blockPos, resourceKey) -> {
+                        portalReturns.add(new PortalReturn(blockPos, resourceKey));
+                    });
+                    return portalReturns;
+                })
+        ).apply(instance, v -> {
+            Map<BlockPos, ResourceKey<Level>> dimensions = new HashMap<>();
+            v.forEach(portalReturn -> dimensions.put(
+                    portalReturn.blockPos,
+                    portalReturn.resourceKey
+            ));
+            return new PortalReturns(dimensions);
         });
-        compoundTag.put("Dimensions", listTag);
+    });
 
-        return compoundTag;
+    public static SavedDataType<PortalReturns> TYPE = new SavedDataType<>(
+            WorldPortal.MOD_ID + "_returns",
+            PortalReturns::new,
+            CODEC,
+            null
+    );
+
+    private final Map<BlockPos, ResourceKey<Level>> dimensions;
+
+    public PortalReturns() {
+        this.dimensions = new HashMap<>();
+        this.setDirty();
+    }
+
+    private PortalReturns(Map<BlockPos, ResourceKey<Level>> dimensions) {
+        this.dimensions = dimensions;
     }
 
     public Map<BlockPos, ResourceKey<Level>> getDimensions() {
@@ -54,33 +72,19 @@ public class PortalReturns extends SavedData {
         this.setDirty();
     }
 
-    public static SavedData.Factory<PortalReturns> factory() {
-        return new SavedData.Factory<>(
-                PortalReturns::new,
-                (compoundTag, provider) -> load(compoundTag),
-                null
-        );
-    }
-
-    public static PortalReturns load(CompoundTag compoundTag) {
-        PortalReturns portalReturns = new PortalReturns();
-
-        ListTag dimensionsTag = compoundTag.getList("Dimensions", 10);
-        for(int i = 0; i < dimensionsTag.size(); ++i) {
-            CompoundTag compoundTagX = dimensionsTag.getCompound(i);
-            portalReturns.dimensions.put(
-                    new BlockPos(
-                            compoundTagX.getInt("PosX"),
-                            compoundTagX.getInt("PosY"),
-                            compoundTagX.getInt("PosZ")
-                    ),
-                    ResourceKey.create(
-                            Registries.DIMENSION,
-                            ResourceLocation.parse(compoundTagX.getString("Dimension"))
-                    )
-            );
-        }
-
-        return portalReturns;
+    record PortalReturn(BlockPos blockPos, ResourceKey<Level> resourceKey) {
+        static final Codec<PortalReturn> CODEC = RecordCodecBuilder.create(instance -> {
+            return instance.group(
+                    Codec.INT.fieldOf("PosX").forGetter(v -> v.blockPos.getX()),
+                    Codec.INT.fieldOf("PosY").forGetter(v -> v.blockPos.getY()),
+                    Codec.INT.fieldOf("PosZ").forGetter(v -> v.blockPos.getZ()),
+                    ResourceLocation.CODEC.fieldOf("Dimension").forGetter(v -> {
+                        return v.resourceKey.location();
+                    })
+            ).apply(instance, (x, y, z, resourceLocation) -> new PortalReturn(
+                    new BlockPos(x, y, z),
+                    ResourceKey.create(Registries.DIMENSION, resourceLocation)
+            ));
+        });
     }
 }

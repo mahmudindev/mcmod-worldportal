@@ -255,7 +255,7 @@ public abstract class PortalForcerLMixin {
 
             ResourceLocation frameC1 = portal.getFrameBottomLeftLocation();
             if (frameC1 != null) {
-                Block block = BuiltInRegistries.BLOCK.get(frameC1);
+                Block block = BuiltInRegistries.BLOCK.getValue(frameC1);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
                         axis == AxisX ? foundRectangle.axis1Size : 0,
                         hasHA ? -1 : 0,
@@ -264,7 +264,7 @@ public abstract class PortalForcerLMixin {
             }
             ResourceLocation frameC2 = portal.getFrameBottomRightLocation();
             if (frameC2 != null) {
-                Block block = BuiltInRegistries.BLOCK.get(frameC2);
+                Block block = BuiltInRegistries.BLOCK.getValue(frameC2);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
                         axis == AxisX ? -1 : 0,
                         hasHA ? -1 : 0,
@@ -273,7 +273,7 @@ public abstract class PortalForcerLMixin {
             }
             ResourceLocation frameC3 = portal.getFrameTopLeftLocation();
             if (frameC3 != null) {
-                Block block = BuiltInRegistries.BLOCK.get(frameC3);
+                Block block = BuiltInRegistries.BLOCK.getValue(frameC3);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
                         axis == AxisX ? foundRectangle.axis1Size : 0,
                         hasHA ? foundRectangle.axis2Size : 0,
@@ -284,7 +284,7 @@ public abstract class PortalForcerLMixin {
             }
             ResourceLocation frameC4 = portal.getFrameTopRightLocation();
             if (frameC4 != null) {
-                Block block = BuiltInRegistries.BLOCK.get(frameC4);
+                Block block = BuiltInRegistries.BLOCK.getValue(frameC4);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
                         axis == AxisX ? -1 : 0,
                         hasHA ? foundRectangle.axis2Size : 0,

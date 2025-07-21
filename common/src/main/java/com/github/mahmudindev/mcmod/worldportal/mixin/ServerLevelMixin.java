@@ -46,10 +46,7 @@ public abstract class ServerLevelMixin implements IServerLevel {
             RandomSequences randomSequences,
             CallbackInfo ci
     ) {
-        this.portalReturns = this.getDataStorage().computeIfAbsent(
-                PortalReturns.factory(),
-                PortalReturns.FIELD
-        );
+        this.portalReturns = this.getDataStorage().computeIfAbsent(PortalReturns.TYPE);
     }
 
     @Override
