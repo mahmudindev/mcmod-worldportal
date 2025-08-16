@@ -1,0 +1,31 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+issueTrackerURL = "https://github.com/mahmudindev/mcmod-worldportal/issues"
+license = "ARR"
+
+[[mods]]
+modId = "worldportal"
+version = "${version}"
+displayName = "World Portal"
+authors = "mahmudindev"
+description = '''
+Create custom world portal to travel between dimensions.
+'''
+logoFile = "assets/worldportal/icon.png"
+
+[[dependencies.worldportal]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.worldportal]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+["lithium:options"]
+"mixin.ai.poi.fast_portals" = false
