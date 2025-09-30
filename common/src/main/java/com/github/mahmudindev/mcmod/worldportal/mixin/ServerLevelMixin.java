@@ -5,7 +5,6 @@ import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
@@ -38,7 +37,6 @@ public abstract class ServerLevelMixin implements IServerLevel {
             ServerLevelData serverLevelData,
             ResourceKey<Level> dimension,
             LevelStem levelStem,
-            ChunkProgressListener chunkProgressListener,
             boolean isDebug,
             long biomeZoomSeed,
             List<CustomSpawner> customSpawners,
