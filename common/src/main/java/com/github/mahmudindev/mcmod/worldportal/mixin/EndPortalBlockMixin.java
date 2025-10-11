@@ -33,6 +33,7 @@ public abstract class EndPortalBlockMixin {
             BlockPos blockPos,
             Entity entity,
             InsideBlockEffectApplier insideBlockEffectApplier,
+            boolean bl,
             CallbackInfo ci
     ) {
         if (entity.isOnPortalCooldown()) {
