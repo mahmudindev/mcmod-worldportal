@@ -11,14 +11,14 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import net.minecraft.BlockUtil;
+import net.minecraft.util.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.Level;
@@ -108,21 +108,21 @@ public abstract class PortalForcerLMixin {
                     blockPosZ -> this.level.getBlockState(blockPosZ) == blockState
             );
 
-            ResourceLocation frameC1 = BuiltInRegistries.BLOCK.getKey(
+            Identifier frameC1 = BuiltInRegistries.BLOCK.getKey(
                     this.level.getBlockState(foundRectangle.minCorner.offset(
                             axis == AxisX ? foundRectangle.axis1Size : 0,
                             hasHAX ? -1 : 0,
                             hasHAX ? axis == AxisZ ? foundRectangle.axis1Size : 0 : -1
                     )).getBlock()
             );
-            ResourceLocation frameC2 = BuiltInRegistries.BLOCK.getKey(
+            Identifier frameC2 = BuiltInRegistries.BLOCK.getKey(
                     this.level.getBlockState(foundRectangle.minCorner.offset(
                             axis == AxisX ? -1 : 0,
                             hasHAX ? -1 : 0,
                             hasHAX && axis != AxisZ ? 0 : -1
                     )).getBlock()
             );
-            ResourceLocation frameC3 = BuiltInRegistries.BLOCK.getKey(
+            Identifier frameC3 = BuiltInRegistries.BLOCK.getKey(
                     this.level.getBlockState(foundRectangle.minCorner.offset(
                             axis == AxisX ? foundRectangle.axis1Size : 0,
                             hasHAX ? foundRectangle.axis2Size : 0,
@@ -131,7 +131,7 @@ public abstract class PortalForcerLMixin {
                                     : 0 : foundRectangle.axis2Size
                     )).getBlock()
             );
-            ResourceLocation frameC4 = BuiltInRegistries.BLOCK.getKey(
+            Identifier frameC4 = BuiltInRegistries.BLOCK.getKey(
                     this.level.getBlockState(foundRectangle.minCorner.offset(
                             axis == AxisX ? -1 : 0,
                             hasHAX ? foundRectangle.axis2Size : 0,
@@ -145,7 +145,7 @@ public abstract class PortalForcerLMixin {
                 blockPosPassX = hasHA == hasHAX;
 
                 if (blockPosPassX) {
-                    for (ResourceLocation[] v : new ResourceLocation[][]{
+                    for (Identifier[] v : new Identifier[][]{
                             {frameC1, portal.getFrameBottomLeftLocation()},
                             {frameC2, portal.getFrameBottomRightLocation()},
                             {frameC3, portal.getFrameTopLeftLocation()},
@@ -162,31 +162,31 @@ public abstract class PortalForcerLMixin {
             } else if (hasHAX) {
                 blockPosPassX = true;
 
-                Map<ResourceLocation, PortalData> portals = PortalManager.getPortals();
-                for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+                Map<Identifier, PortalData> portals = PortalManager.getPortals();
+                for (Map.Entry<Identifier, PortalData> entry : portals.entrySet()) {
                     PortalData portalX = entry.getValue();
 
-                    ResourceLocation mode = portalX.getModeLocation();
+                    Identifier mode = portalX.getModeLocation();
                     if (mode != null && !mode.equals(PortalData.DEFAULT_MODE)) {
                         continue;
                     }
 
-                    ResourceLocation c1 = portalX.getFrameBottomLeftLocation();
+                    Identifier c1 = portalX.getFrameBottomLeftLocation();
                     if (c1 != null && !c1.equals(frameC1)) {
                         continue;
                     }
 
-                    ResourceLocation c2 = portalX.getFrameBottomRightLocation();
+                    Identifier c2 = portalX.getFrameBottomRightLocation();
                     if (c2 != null && !c2.equals(frameC2)) {
                         continue;
                     }
 
-                    ResourceLocation c3 = portalX.getFrameTopLeftLocation();
+                    Identifier c3 = portalX.getFrameTopLeftLocation();
                     if (c3 != null && !c3.equals(frameC3)) {
                         continue;
                     }
 
-                    ResourceLocation c4 = portalX.getFrameTopRightLocation();
+                    Identifier c4 = portalX.getFrameTopRightLocation();
                     if (c4 != null && !c4.equals(frameC4)) {
                         continue;
                     }
@@ -253,7 +253,7 @@ public abstract class PortalForcerLMixin {
             Direction.Axis AxisX = Direction.Axis.X;
             Direction.Axis AxisZ = Direction.Axis.Z;
 
-            ResourceLocation frameC1 = portal.getFrameBottomLeftLocation();
+            Identifier frameC1 = portal.getFrameBottomLeftLocation();
             if (frameC1 != null) {
                 Block block = BuiltInRegistries.BLOCK.getValue(frameC1);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
@@ -262,7 +262,7 @@ public abstract class PortalForcerLMixin {
                         hasHA ? axis == AxisZ ? foundRectangle.axis1Size : 0 : -1
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC2 = portal.getFrameBottomRightLocation();
+            Identifier frameC2 = portal.getFrameBottomRightLocation();
             if (frameC2 != null) {
                 Block block = BuiltInRegistries.BLOCK.getValue(frameC2);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
@@ -271,7 +271,7 @@ public abstract class PortalForcerLMixin {
                         hasHA && axis != AxisZ ? 0 : -1
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC3 = portal.getFrameTopLeftLocation();
+            Identifier frameC3 = portal.getFrameTopLeftLocation();
             if (frameC3 != null) {
                 Block block = BuiltInRegistries.BLOCK.getValue(frameC3);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
@@ -282,7 +282,7 @@ public abstract class PortalForcerLMixin {
                                 : 0 : foundRectangle.axis2Size
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC4 = portal.getFrameTopRightLocation();
+            Identifier frameC4 = portal.getFrameTopRightLocation();
             if (frameC4 != null) {
                 Block block = BuiltInRegistries.BLOCK.getValue(frameC4);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(

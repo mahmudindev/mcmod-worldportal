@@ -4,7 +4,7 @@ import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import com.github.mahmudindev.mcmod.worldportal.config.Config;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.IOException;
@@ -12,23 +12,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PortalManager {
-    private static final Map<ResourceLocation, PortalData> PORTALS = new HashMap<>();
+    private static final Map<Identifier, PortalData> PORTALS = new HashMap<>();
 
     public static void onResourceManagerReload(ResourceManager manager) {
         PORTALS.clear();
 
         Config config = Config.getConfig();
         config.getPortals().forEach((id, portal) -> setPortal(
-                ResourceLocation.parse(id),
+                Identifier.parse(id),
                 portal
         ));
 
         Gson gson = new Gson();
         manager.listResources(
                 WorldPortal.MOD_ID,
-                resourceLocation -> resourceLocation.getPath().endsWith(".json")
-        ).forEach((resourceLocation, resource) -> {
-            String resourcePath = resourceLocation.getPath().replaceFirst(
+                identifier -> identifier.getPath().endsWith(".json")
+        ).forEach((identifier, resource) -> {
+            String resourcePath = identifier.getPath().replaceFirst(
                     "^%s/".formatted(WorldPortal.MOD_ID),
                     ""
             );
@@ -42,7 +42,7 @@ public class PortalManager {
                         .substring(resourcePath.indexOf("/") + 1)
                         .replaceAll("\\.json$", "");
 
-                setPortal(resourceLocation.withPath(portalPath), gson.fromJson(
+                setPortal(identifier.withPath(portalPath), gson.fromJson(
                         JsonParser.parseReader(resource.openAsReader()),
                         PortalData.class
                 ));
@@ -52,15 +52,15 @@ public class PortalManager {
         });
     }
 
-    public static Map<ResourceLocation, PortalData> getPortals() {
+    public static Map<Identifier, PortalData> getPortals() {
         return Map.copyOf(PORTALS);
     }
 
-    public static PortalData getPortal(ResourceLocation id) {
+    public static PortalData getPortal(Identifier id) {
         return PORTALS.get(id);
     }
 
-    public static void setPortal(ResourceLocation id, PortalData portal) {
+    public static void setPortal(Identifier id, PortalData portal) {
         PORTALS.put(id, portal);
     }
 }

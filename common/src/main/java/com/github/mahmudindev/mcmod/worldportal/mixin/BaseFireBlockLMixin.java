@@ -4,7 +4,7 @@ import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,15 +25,15 @@ public abstract class BaseFireBlockLMixin {
         Boolean inPortalDimension = original.call(level);
 
         if (!inPortalDimension) {
-            Map<ResourceLocation, PortalData> portals = PortalManager.getPortals();
-            for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+            Map<Identifier, PortalData> portals = PortalManager.getPortals();
+            for (Map.Entry<Identifier, PortalData> entry : portals.entrySet()) {
                 if (inPortalDimension) {
                     break;
                 }
 
                 PortalData portal = entry.getValue();
 
-                ResourceLocation mode = portal.getModeLocation();
+                Identifier mode = portal.getModeLocation();
                 if (mode != null && !mode.equals(PortalData.DEFAULT_MODE)) {
                     continue;
                 }

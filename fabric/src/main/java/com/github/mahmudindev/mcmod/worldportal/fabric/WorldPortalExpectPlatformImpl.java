@@ -21,7 +21,7 @@ public class WorldPortalExpectPlatformImpl {
             int validRange
     ) {
         PointOfInterestHelper.register(
-                resourceKey.location(),
+                resourceKey.identifier(),
                 maxTickets,
                 validRange,
                 matchingStates

@@ -3,7 +3,7 @@ package com.github.mahmudindev.mcmod.worldportal.mixin;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.BlockUtil;
+import net.minecraft.util.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
@@ -65,7 +65,7 @@ public abstract class NetherPortalBlockLMixin {
             method = "getExitPortal",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/BlockUtil;getLargestRectangleAround(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction$Axis;ILnet/minecraft/core/Direction$Axis;ILjava/util/function/Predicate;)Lnet/minecraft/BlockUtil$FoundRectangle;"
+                    target = "Lnet/minecraft/util/BlockUtil;getLargestRectangleAround(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction$Axis;ILnet/minecraft/core/Direction$Axis;ILjava/util/function/Predicate;)Lnet/minecraft/util/BlockUtil$FoundRectangle;"
             )
     )
     private BlockUtil.FoundRectangle getExitPortalPrepare(

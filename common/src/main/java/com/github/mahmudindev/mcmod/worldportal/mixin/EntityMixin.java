@@ -7,12 +7,12 @@ import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.BlockUtil;
+import net.minecraft.util.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -32,7 +32,7 @@ import java.util.Map;
 @Mixin(Entity.class)
 public abstract class EntityMixin implements IEntity {
     @Unique
-    private ResourceLocation portalId;
+    private Identifier portalId;
 
     @Shadow public abstract Level level();
 
@@ -91,7 +91,7 @@ public abstract class EntityMixin implements IEntity {
     }
 
     @Override
-    public ResourceLocation worldportal$getPortalId() {
+    public Identifier worldportal$getPortalId() {
         return this.portalId;
     }
 
@@ -101,7 +101,7 @@ public abstract class EntityMixin implements IEntity {
     }
 
     @Override
-    public void worldportal$setPortal(ResourceLocation portalId) {
+    public void worldportal$setPortal(Identifier portalId) {
         this.portalId = portalId;
     }
 
@@ -128,21 +128,21 @@ public abstract class EntityMixin implements IEntity {
 
         BlockPos minCornerPos = foundRectangle.minCorner;
 
-        ResourceLocation frameC1 = BuiltInRegistries.BLOCK.getKey(
+        Identifier frameC1 = BuiltInRegistries.BLOCK.getKey(
                 level.getBlockState(minCornerPos.offset(
                         axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
                         hasHA ? -1 : 0,
                         hasHA ? axis == Direction.Axis.Z ? foundRectangle.axis1Size : 0 : -1
                 )).getBlock()
         );
-        ResourceLocation frameC2 = BuiltInRegistries.BLOCK.getKey(
+        Identifier frameC2 = BuiltInRegistries.BLOCK.getKey(
                 level.getBlockState(minCornerPos.offset(
                         axis == Direction.Axis.X ? -1 : 0,
                         hasHA ? -1 : 0,
                         hasHA && axis != Direction.Axis.Z ? 0 : -1
                 )).getBlock()
         );
-        ResourceLocation frameC3 = BuiltInRegistries.BLOCK.getKey(
+        Identifier frameC3 = BuiltInRegistries.BLOCK.getKey(
                 level.getBlockState(minCornerPos.offset(
                         axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
                         hasHA ? foundRectangle.axis2Size : 0,
@@ -151,7 +151,7 @@ public abstract class EntityMixin implements IEntity {
                                 : 0 : foundRectangle.axis2Size
                 )).getBlock()
         );
-        ResourceLocation frameC4 = BuiltInRegistries.BLOCK.getKey(
+        Identifier frameC4 = BuiltInRegistries.BLOCK.getKey(
                 level.getBlockState(minCornerPos.offset(
                         axis == Direction.Axis.X ? -1 : 0,
                         hasHA ? foundRectangle.axis2Size : 0,
@@ -159,10 +159,10 @@ public abstract class EntityMixin implements IEntity {
                 )).getBlock()
         );
 
-        Map<ResourceLocation, PortalData> portals = new HashMap<>();
+        Map<Identifier, PortalData> portals = new HashMap<>();
 
         PortalManager.getPortals().forEach((k, v) -> {
-            ResourceLocation mode = v.getModeLocation();
+            Identifier mode = v.getModeLocation();
             if (hasHA) {
                 if (mode != null && !mode.equals(PortalData.DEFAULT_MODE)) {
                     return;
@@ -173,22 +173,22 @@ public abstract class EntityMixin implements IEntity {
                 }
             }
 
-            ResourceLocation c1 = v.getFrameBottomLeftLocation();
+            Identifier c1 = v.getFrameBottomLeftLocation();
             if (c1 != null && !frameC1.equals(c1)) {
                 return;
             }
 
-            ResourceLocation c2 = v.getFrameBottomRightLocation();
+            Identifier c2 = v.getFrameBottomRightLocation();
             if (c2 != null && !frameC2.equals(c2)) {
                 return;
             }
 
-            ResourceLocation c3 = v.getFrameTopLeftLocation();
+            Identifier c3 = v.getFrameTopLeftLocation();
             if (c3 != null && !frameC3.equals(c3)) {
                 return;
             }
 
-            ResourceLocation c4 = v.getFrameTopRightLocation();
+            Identifier c4 = v.getFrameTopRightLocation();
             if (c4 != null && !frameC4.equals(c4)) {
                 return;
             }
@@ -204,7 +204,7 @@ public abstract class EntityMixin implements IEntity {
         if (!portals.isEmpty()) {
             ResourceKey<Level> resourceKeyZ = portalReturns.getDimension(minCornerPos);
             if (resourceKeyZ != null) {
-                for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+                for (Map.Entry<Identifier, PortalData> entry : portals.entrySet()) {
                     ResourceKey<Level> resourceKeyV = entry.getValue().getDestinationKey();
                     if (resourceKeyX != resourceKeyV) {
                         continue;
@@ -225,7 +225,7 @@ public abstract class EntityMixin implements IEntity {
 
                 ResourceKey<Level> resourceKeyB = entry.getValue();
 
-                for (Map.Entry<ResourceLocation, PortalData> entryX : portals.entrySet()) {
+                for (Map.Entry<Identifier, PortalData> entryX : portals.entrySet()) {
                     ResourceKey<Level> resourceKeyA = entryX.getValue().getDestinationKey();
                     if (resourceKeyX != resourceKeyA) {
                         continue;
@@ -247,7 +247,7 @@ public abstract class EntityMixin implements IEntity {
             int random = level.getRandom().nextInt(portals.size());
 
             int i = 0;
-            for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+            for (Map.Entry<Identifier, PortalData> entry : portals.entrySet()) {
                 if (i != random) {
                     i++;
 

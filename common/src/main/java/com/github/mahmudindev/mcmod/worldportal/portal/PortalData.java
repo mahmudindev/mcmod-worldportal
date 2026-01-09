@@ -4,15 +4,15 @@ import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import com.google.gson.annotations.SerializedName;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 public class PortalData {
-    public static final ResourceLocation DEFAULT_MODE = ResourceLocation.tryBuild(
+    public static final Identifier DEFAULT_MODE = Identifier.tryBuild(
             WorldPortal.MOD_ID,
             "default"
     );
-    public static final ResourceLocation HORIZONTAL_MODE = ResourceLocation.tryBuild(
+    public static final Identifier HORIZONTAL_MODE = Identifier.tryBuild(
             WorldPortal.MOD_ID,
             "horizontal"
     );
@@ -32,14 +32,14 @@ public class PortalData {
         return this.frameTopRight;
     }
 
-    public ResourceLocation getFrameTopRightLocation() {
+    public Identifier getFrameTopRightLocation() {
         String id = this.getFrameTopRight();
 
         if (id == null || id.isEmpty()) {
             return null;
         }
 
-        return ResourceLocation.parse(id);
+        return Identifier.parse(id);
     }
 
     public void setFrameTopRight(String frameTopRight) {
@@ -50,14 +50,14 @@ public class PortalData {
         return this.frameTopLeft;
     }
 
-    public ResourceLocation getFrameTopLeftLocation() {
+    public Identifier getFrameTopLeftLocation() {
         String id = this.getFrameTopLeft();
 
         if (id == null || id.isEmpty()) {
             return null;
         }
 
-        return ResourceLocation.parse(id);
+        return Identifier.parse(id);
     }
 
     public void setFrameTopLeft(String frameTopLeft) {
@@ -68,14 +68,14 @@ public class PortalData {
         return this.frameBottomRight;
     }
 
-    public ResourceLocation getFrameBottomRightLocation() {
+    public Identifier getFrameBottomRightLocation() {
         String id = this.getFrameBottomRight();
 
         if (id == null || id.isEmpty()) {
             return null;
         }
 
-        return ResourceLocation.parse(id);
+        return Identifier.parse(id);
     }
 
     public void setFrameBottomRight(String frameBottomRight) {
@@ -86,14 +86,14 @@ public class PortalData {
         return this.frameBottomLeft;
     }
 
-    public ResourceLocation getFrameBottomLeftLocation() {
+    public Identifier getFrameBottomLeftLocation() {
         String id = this.getFrameBottomLeft();
 
         if (id == null || id.isEmpty()) {
             return null;
         }
 
-        return ResourceLocation.parse(id);
+        return Identifier.parse(id);
     }
 
     public void setFrameBottomLeft(String frameBottomLeft) {
@@ -104,14 +104,14 @@ public class PortalData {
         return this.mode;
     }
 
-    public ResourceLocation getModeLocation() {
+    public Identifier getModeLocation() {
         String id = this.getMode();
 
         if (id == null || id.isEmpty()) {
             return null;
         }
 
-        return ResourceLocation.parse(id);
+        return Identifier.parse(id);
     }
 
     public void setMode(String mode) {
@@ -122,8 +122,8 @@ public class PortalData {
         return this.destination;
     }
 
-    public ResourceLocation getDestinationLocation() {
-        return ResourceLocation.parse(this.getDestination());
+    public Identifier getDestinationLocation() {
+        return Identifier.parse(this.getDestination());
     }
 
     public ResourceKey<Level> getDestinationKey() {

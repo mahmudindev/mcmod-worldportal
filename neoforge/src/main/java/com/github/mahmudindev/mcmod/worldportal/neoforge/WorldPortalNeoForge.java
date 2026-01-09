@@ -1,7 +1,7 @@
 package com.github.mahmudindev.mcmod.worldportal.neoforge;
 
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.neoforged.bus.api.IEventBus;
@@ -21,7 +21,7 @@ public final class WorldPortalNeoForge {
 
         NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> {
             event.addListener(
-                    ResourceLocation.fromNamespaceAndPath(
+                    Identifier.fromNamespaceAndPath(
                             WorldPortal.MOD_ID,
                             "default"
                     ),

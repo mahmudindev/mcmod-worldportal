@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
@@ -78,12 +78,12 @@ public class PortalReturns extends SavedData {
                     Codec.INT.fieldOf("PosX").forGetter(v -> v.blockPos.getX()),
                     Codec.INT.fieldOf("PosY").forGetter(v -> v.blockPos.getY()),
                     Codec.INT.fieldOf("PosZ").forGetter(v -> v.blockPos.getZ()),
-                    ResourceLocation.CODEC.fieldOf("Dimension").forGetter(v -> {
-                        return v.resourceKey.location();
+                    Identifier.CODEC.fieldOf("Dimension").forGetter(v -> {
+                        return v.resourceKey.identifier();
                     })
-            ).apply(instance, (x, y, z, resourceLocation) -> new PortalReturn(
+            ).apply(instance, (x, y, z, identifier) -> new PortalReturn(
                     new BlockPos(x, y, z),
-                    ResourceKey.create(Registries.DIMENSION, resourceLocation)
+                    ResourceKey.create(Registries.DIMENSION, identifier)
             ));
         });
     }

@@ -4,7 +4,7 @@ import com.github.mahmudindev.mcmod.worldportal.base.IBlockPos;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -16,7 +16,7 @@ public abstract class BlockPosMixin implements IBlockPos {
     @Unique
     private BlockPos portalEntrancePos;
     @Unique
-    private ResourceLocation portalId;
+    private Identifier portalId;
 
     @Override
     public Level worldportal$getLevel() {
@@ -39,7 +39,7 @@ public abstract class BlockPosMixin implements IBlockPos {
     }
 
     @Override
-    public ResourceLocation worldportal$getPortalId() {
+    public Identifier worldportal$getPortalId() {
         return this.portalId;
     }
 
@@ -49,7 +49,7 @@ public abstract class BlockPosMixin implements IBlockPos {
     }
 
     @Override
-    public void worldportal$setPortal(ResourceLocation portalId) {
+    public void worldportal$setPortal(Identifier portalId) {
         this.portalId = portalId;
     }
 }
