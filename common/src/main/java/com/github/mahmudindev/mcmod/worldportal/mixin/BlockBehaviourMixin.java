@@ -1,8 +1,11 @@
 package com.github.mahmudindev.mcmod.worldportal.mixin;
 
+import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -76,13 +79,20 @@ public abstract class BlockBehaviourMixin {
             return;
         }
 
+        if (!(levelAccessor instanceof ServerLevel)) {
+            return;
+        }
+
+        IServerLevel serverLevelX = (IServerLevel) levelAccessor;
+        PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
+
         for (int x = 0; x < foundRectangle.axis1Size; x++) {
             for (int z = 0; z < foundRectangle.axis2Size; z++) {
-                levelAccessor.setBlock(
-                        foundRectangle.minCorner.offset(x, 0, z),
-                        Blocks.AIR.defaultBlockState(),
-                        18
-                );
+                BlockPos blockPosX = foundRectangle.minCorner.offset(x, 0, z);
+
+                levelAccessor.setBlock(blockPosX, Blocks.AIR.defaultBlockState(), 18);
+
+                portalPositions.removeBlock(blockPosX);
             }
         }
 

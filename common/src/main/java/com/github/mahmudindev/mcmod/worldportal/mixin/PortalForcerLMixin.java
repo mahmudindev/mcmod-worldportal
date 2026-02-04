@@ -2,9 +2,10 @@ package com.github.mahmudindev.mcmod.worldportal.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import com.github.mahmudindev.mcmod.worldportal.base.IBlockPos;
-import com.github.mahmudindev.mcmod.worldportal.core.WorldPortalPoiTypes;
+import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -12,22 +13,24 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import net.minecraft.BlockUtil;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Vec3i;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.portal.PortalForcer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,8 +39,10 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Mixin(value = PortalForcer.class, priority = 750)
@@ -45,22 +50,79 @@ public abstract class PortalForcerLMixin {
     @Shadow @Final private ServerLevel level;
 
     @WrapOperation(
-            method = "method_22389",
+            method = "findPortalAround",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/core/Holder;is(Lnet/minecraft/resources/ResourceKey;)Z"
+                    target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;getInSquare(Ljava/util/function/Predicate;Lnet/minecraft/core/BlockPos;ILnet/minecraft/world/entity/ai/village/poi/PoiManager$Occupancy;)Ljava/util/stream/Stream;"
             )
     )
-    private static boolean method22389IncludePoiType(
-            Holder<PoiType> instance,
-            ResourceKey<PoiType> resourceKey,
-            Operation<Boolean> original
+    private Stream<PoiRecord> findPortalAroundGetInSquareInclude(
+            PoiManager instance,
+            Predicate<Holder<PoiType>> predicate,
+            BlockPos blockPos,
+            int i,
+            PoiManager.Occupancy occupancy,
+            Operation<Stream<PoiRecord>> original
     ) {
-        if (instance.is(WorldPortalPoiTypes.END_PORTAL)) {
-            return true;
-        }
+        Stream<PoiRecord> poiRecordStream = original.call(
+                instance,
+                predicate,
+                blockPos,
+                i,
+                occupancy
+        );
 
-        return original.call(instance, resourceKey);
+        IServerLevel serverLevelX = (IServerLevel) this.level;
+        PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
+        ResourceKey<Block> blockResourceKey = ResourceKey.create(
+                Registries.BLOCK,
+                BuiltInRegistries.BLOCK.getKey(Blocks.NETHER_PORTAL)
+        );
+        ResourceKey<PoiType> poiTypeResourceKey = PoiTypes.NETHER_PORTAL;
+        PoiType poiType = BuiltInRegistries.POINT_OF_INTEREST_TYPE.get(poiTypeResourceKey);
+        Holder<PoiType> poiTypeHolder = Holder.direct(poiType);
+        Stream<PoiRecord> poiRecordStreamX = ChunkPos.rangeClosed(
+                new ChunkPos(blockPos),
+                Math.floorDiv(i, 16) + 1
+        ).flatMap(chunkPos -> IntStream.range(
+                this.level.getMinSection(),
+                this.level.getMaxSection()
+        ).boxed().flatMap(height -> SectionPos.of(
+                chunkPos,
+                height
+        ).blocksInside()).map(blockPosX -> {
+            ResourceKey<Block> blockResourceKeyX = portalPositions.getBlock(blockPosX);
+
+            if (blockResourceKeyX == null || blockResourceKeyX == blockResourceKey) {
+                return null;
+            }
+
+            ChunkAccess chunkAccess = this.level.getChunk(blockPosX);
+            BlockState blockState = chunkAccess.getBlockState(blockPosX);
+            if (ResourceKey.create(
+                    Registries.BLOCK,
+                    BuiltInRegistries.BLOCK.getKey(blockState.getBlock())
+            ) != blockResourceKeyX) {
+                portalPositions.removeBlock(blockPosX);
+
+                return null;
+            }
+
+            return new PoiRecord(blockPosX, poiTypeHolder, () -> {});
+        }).filter(Objects::nonNull)).filter(poiRecord -> {
+            BlockPos blockPosX = poiRecord.getPos();
+            if (Math.abs(blockPosX.getX() - blockPos.getX()) > i) {
+                return false;
+            }
+
+            if (Math.abs(blockPosX.getZ() - blockPos.getZ()) > i) {
+                return false;
+            }
+
+            return true;
+        });
+
+        return Stream.concat(poiRecordStream, poiRecordStreamX);
     }
 
     @WrapOperation(
@@ -359,7 +421,6 @@ public abstract class PortalForcerLMixin {
             int j,
             int k,
             Operation<BlockPos.MutableBlockPos> original,
-            BlockPos blockPos,
             @Share(
                     namespace = WorldPortal.MOD_ID,
                     value = "hasHA"
@@ -389,7 +450,6 @@ public abstract class PortalForcerLMixin {
             int j,
             int k,
             Operation<BlockPos.MutableBlockPos> original,
-            BlockPos blockPos,
             @Share(
                     namespace = WorldPortal.MOD_ID,
                     value = "hasHA"
@@ -458,7 +518,6 @@ public abstract class PortalForcerLMixin {
             int j,
             int k,
             Operation<BlockPos.MutableBlockPos> original,
-            BlockPos blockPos,
             @Share(
                     namespace = WorldPortal.MOD_ID,
                     value = "hasHA"
