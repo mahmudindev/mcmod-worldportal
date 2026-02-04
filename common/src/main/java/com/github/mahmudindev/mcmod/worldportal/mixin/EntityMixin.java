@@ -181,10 +181,8 @@ public abstract class EntityMixin implements IEntity {
             portals.put(k, v);
         });
 
-        ResourceKey<Level> resourceKeyX = level.dimension();
-
         IServerLevel serverLevelX = (IServerLevel) level;
-        PortalReturns portalReturns = serverLevelX.worldportal$getPortalReturns();
+        ResourceKey<Level> resourceKeyX = level.dimension();
 
         if (!portals.isEmpty()) {
             PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
@@ -204,6 +202,8 @@ public abstract class EntityMixin implements IEntity {
                     );
                 }
             }
+
+            PortalReturns portalReturns = serverLevelX.worldportal$getPortalReturns();
 
             ResourceKey<Level> resourceKeyZ = portalReturns.getDimension(minCornerPos);
             if (resourceKeyZ != null) {
@@ -267,8 +267,6 @@ public abstract class EntityMixin implements IEntity {
                 }
             }
         }
-
-        portalReturns.removeDimension(minCornerPos);
 
         return hasHA ? originalKey : null;
     }

@@ -20,7 +20,7 @@ public class PortalReturns extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag compoundTag) {
-        ListTag listTag = new ListTag();
+        ListTag dimensions = new ListTag();
         this.dimensions.forEach((k, v) -> {
             CompoundTag compoundTagX = new CompoundTag();
             compoundTagX.putInt("PosX", k.getX());
@@ -28,9 +28,9 @@ public class PortalReturns extends SavedData {
             compoundTagX.putInt("PosZ", k.getZ());
             compoundTagX.putString("Dimension", String.valueOf(v.location()));
 
-            listTag.add(compoundTagX);
+            dimensions.add(compoundTagX);
         });
-        compoundTag.put("Dimensions", listTag);
+        compoundTag.put("Dimensions", dimensions);
 
         return compoundTag;
     }
@@ -56,9 +56,9 @@ public class PortalReturns extends SavedData {
     public static PortalReturns load(CompoundTag compoundTag) {
         PortalReturns portalReturns = new PortalReturns();
 
-        ListTag dimensionsTag = compoundTag.getList("Dimensions", 10);
-        for(int i = 0; i < dimensionsTag.size(); ++i) {
-            CompoundTag compoundTagX = dimensionsTag.getCompound(i);
+        ListTag dimensions = compoundTag.getList("Dimensions", 10);
+        for(int i = 0; i < dimensions.size(); ++i) {
+            CompoundTag compoundTagX = dimensions.getCompound(i);
             portalReturns.dimensions.put(
                     new BlockPos(
                             compoundTagX.getInt("PosX"),
