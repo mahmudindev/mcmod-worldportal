@@ -3,7 +3,7 @@ package com.github.mahmudindev.mcmod.worldportal.mixin;
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import com.github.mahmudindev.mcmod.worldportal.base.IBlockPos;
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
@@ -140,7 +140,7 @@ public abstract class PortalForcerLMixin {
             BlockPos blockPos
     ) {
         Map<BlockPos, Boolean> blockPosPassMap = new HashMap<>();
-        PortalData portal = ((IBlockPos) blockPos).worldportal$getPortal();
+        PortalConfig portalConfig = ((IBlockPos) blockPos).worldportal$getPortalConfig();
         Level level = ((IBlockPos) blockPos).worldportal$getLevel();
         boolean hasHA = level == null || level
                 .getBlockState(((IBlockPos) blockPos).worldportal$getPortalEntrancePos())
@@ -205,15 +205,15 @@ public abstract class PortalForcerLMixin {
 
             boolean blockPosPassX = false;
 
-            if (portal != null) {
+            if (portalConfig != null) {
                 blockPosPassX = hasHA == hasHAX;
 
                 if (blockPosPassX) {
                     for (ResourceLocation[] v : new ResourceLocation[][]{
-                            {frameC1, portal.getFrameBottomLeftLocation()},
-                            {frameC2, portal.getFrameBottomRightLocation()},
-                            {frameC3, portal.getFrameTopLeftLocation()},
-                            {frameC4, portal.getFrameTopRightLocation()}
+                            {frameC1, portalConfig.getFrameBottomLeftLocation()},
+                            {frameC2, portalConfig.getFrameBottomRightLocation()},
+                            {frameC3, portalConfig.getFrameTopLeftLocation()},
+                            {frameC4, portalConfig.getFrameTopRightLocation()}
                     }) {
                         if (v[1] != null && v[0].equals(v[1])) {
                             continue;
@@ -226,31 +226,31 @@ public abstract class PortalForcerLMixin {
             } else if (hasHAX) {
                 blockPosPassX = true;
 
-                Map<ResourceLocation, PortalData> portals = PortalManager.getPortals();
-                for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
-                    PortalData portalX = entry.getValue();
+                Map<ResourceLocation, PortalConfig> portalConfigs = PortalManager.getPortalConfigs();
+                for (Map.Entry<ResourceLocation, PortalConfig> entry : portalConfigs.entrySet()) {
+                    PortalConfig portalConfigX = entry.getValue();
 
-                    ResourceLocation mode = portalX.getModeLocation();
-                    if (mode != null && !mode.equals(PortalData.DEFAULT_MODE)) {
+                    ResourceLocation mode = portalConfigX.getModeLocation();
+                    if (mode != null && !mode.equals(PortalConfig.DEFAULT_MODE)) {
                         continue;
                     }
 
-                    ResourceLocation c1 = portalX.getFrameBottomLeftLocation();
+                    ResourceLocation c1 = portalConfigX.getFrameBottomLeftLocation();
                     if (c1 != null && !c1.equals(frameC1)) {
                         continue;
                     }
 
-                    ResourceLocation c2 = portalX.getFrameBottomRightLocation();
+                    ResourceLocation c2 = portalConfigX.getFrameBottomRightLocation();
                     if (c2 != null && !c2.equals(frameC2)) {
                         continue;
                     }
 
-                    ResourceLocation c3 = portalX.getFrameTopLeftLocation();
+                    ResourceLocation c3 = portalConfigX.getFrameTopLeftLocation();
                     if (c3 != null && !c3.equals(frameC3)) {
                         continue;
                     }
 
-                    ResourceLocation c4 = portalX.getFrameTopRightLocation();
+                    ResourceLocation c4 = portalConfigX.getFrameTopRightLocation();
                     if (c4 != null && !c4.equals(frameC4)) {
                         continue;
                     }
@@ -356,14 +356,14 @@ public abstract class PortalForcerLMixin {
             return oFoundRectangle;
         }
 
-        PortalData portal = ((IBlockPos) blockPos).worldportal$getPortal();
-        if (portal != null) {
+        PortalConfig portalConfig = ((IBlockPos) blockPos).worldportal$getPortalConfig();
+        if (portalConfig != null) {
             BlockUtil.FoundRectangle foundRectangle = oFoundRectangle.get();
 
             Direction.Axis AxisX = Direction.Axis.X;
             Direction.Axis AxisZ = Direction.Axis.Z;
 
-            ResourceLocation frameC1 = portal.getFrameBottomLeftLocation();
+            ResourceLocation frameC1 = portalConfig.getFrameBottomLeftLocation();
             if (frameC1 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC1);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
@@ -372,7 +372,7 @@ public abstract class PortalForcerLMixin {
                         hasHA ? axis == AxisZ ? foundRectangle.axis1Size : 0 : -1
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC2 = portal.getFrameBottomRightLocation();
+            ResourceLocation frameC2 = portalConfig.getFrameBottomRightLocation();
             if (frameC2 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC2);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
@@ -381,7 +381,7 @@ public abstract class PortalForcerLMixin {
                         hasHA && axis != AxisZ ? 0 : -1
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC3 = portal.getFrameTopLeftLocation();
+            ResourceLocation frameC3 = portalConfig.getFrameTopLeftLocation();
             if (frameC3 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC3);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
@@ -392,7 +392,7 @@ public abstract class PortalForcerLMixin {
                                 : 0 : foundRectangle.axis2Size
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC4 = portal.getFrameTopRightLocation();
+            ResourceLocation frameC4 = portalConfig.getFrameTopRightLocation();
             if (frameC4 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC4);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(

@@ -2,7 +2,7 @@ package com.github.mahmudindev.mcmod.worldportal.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IBlockPos;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
@@ -42,8 +42,8 @@ public abstract class ServerPlayerMixin extends Player implements IEntity {
             Direction.Axis axis,
             Operation<Optional<BlockUtil.FoundRectangle>> original
     ) {
-        PortalData portal = this.worldportal$getPortal();
-        if (portal != null) {
+        PortalConfig portalConfig = this.worldportal$getPortalConfig();
+        if (portalConfig != null) {
             ((IBlockPos) blockPos).worldportal$setLevel(this.level());
             ((IBlockPos) blockPos).worldportal$setPortalEntrancePos(this.portalEntrancePos);
             ((IBlockPos) blockPos).worldportal$setPortal(this.worldportal$getPortalId());

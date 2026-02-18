@@ -1,7 +1,7 @@
 package com.github.mahmudindev.mcmod.worldportal.forge.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
@@ -54,13 +54,13 @@ public abstract class EntityMixin implements IEntity {
         );
 
         if (portalInfo != null) {
-            PortalData portal = this.worldportal$getPortal();
-            if (portal == null) {
+            PortalConfig portalConfig = this.worldportal$getPortalConfig();
+            if (portalConfig == null) {
                 return portalInfo;
             }
 
             ResourceKey<Level> dimension = serverLevel.dimension();
-            if (dimension != portal.getDestinationKey()) {
+            if (dimension != portalConfig.getDestinationKey()) {
                 return portalInfo;
             }
 

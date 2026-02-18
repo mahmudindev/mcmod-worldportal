@@ -26,7 +26,7 @@ public abstract class ServerPlayerLMixin implements IEntity {
             )
     )
     private ResourceKey<Level> changeDimensionEndKey0(ResourceKey<Level> original) {
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             return null;
         }
 
@@ -42,7 +42,7 @@ public abstract class ServerPlayerLMixin implements IEntity {
             )
     )
     private ResourceKey<Level> changeDimensionOverworldKey0(ResourceKey<Level> original) {
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             return null;
         }
 
@@ -67,7 +67,7 @@ public abstract class ServerPlayerLMixin implements IEntity {
             Operation<Entity> original
     ) {
         Function<Boolean, Entity> modifiedRepositionEntity = (spawnPortal) -> {
-            if (this.worldportal$getPortal() != null) {
+            if (this.worldportal$getPortalConfig() != null) {
                 return repositionEntity.apply(false);
             }
 

@@ -1,7 +1,7 @@
 package com.github.mahmudindev.mcmod.worldportal.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -51,8 +51,8 @@ public abstract class EntityLMixin implements IEntity {
             MinecraftServer instance,
             Operation<Boolean> original
     ) {
-        PortalData portal = this.worldportal$getPortal();
-        if (portal != null && portal.getDestinationKey() != Level.NETHER) {
+        PortalConfig portalConfig = this.worldportal$getPortalConfig();
+        if (portalConfig != null && portalConfig.getDestinationKey() != Level.NETHER) {
             return true;
         }
 
@@ -67,7 +67,7 @@ public abstract class EntityLMixin implements IEntity {
             )
     )
     private ResourceKey<Level> findDimensionEntryPointEndKey(ResourceKey<Level> original) {
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             return null;
         }
 
@@ -84,7 +84,7 @@ public abstract class EntityLMixin implements IEntity {
     private ResourceKey<Level> findDimensionEntryPointOverworldKey(
             ResourceKey<Level> original
     ) {
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             return null;
         }
 
@@ -102,7 +102,7 @@ public abstract class EntityLMixin implements IEntity {
     private ResourceKey<Level> findDimensionEntryPointNetherKey1(
             ResourceKey<Level> original
     ) {
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             return this.level().dimension();
         }
 
@@ -125,7 +125,7 @@ public abstract class EntityLMixin implements IEntity {
     ) {
         Vec3 vec3X = original.call(foundRectangle, axis, vec3, entityDimensions);
 
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             BlockPos blockPos = foundRectangle.minCorner;
 
             BlockState blockState = this.level().getBlockState(blockPos);

@@ -2,7 +2,7 @@ package com.github.mahmudindev.mcmod.worldportal.fabric.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -43,13 +43,13 @@ public abstract class ServerPlayerMixin implements IEntity {
         PortalInfo portalInfo = original.call(instance, serverLevel);
 
         if (portalInfo != null) {
-            PortalData portal = this.worldportal$getPortal();
-            if (portal == null) {
+            PortalConfig portalConfig = this.worldportal$getPortalConfig();
+            if (portalConfig == null) {
                 return portalInfo;
             }
 
             ResourceKey<Level> dimension = serverLevel.dimension();
-            if (dimension != portal.getDestinationKey()) {
+            if (dimension != portalConfig.getDestinationKey()) {
                 return portalInfo;
             }
 

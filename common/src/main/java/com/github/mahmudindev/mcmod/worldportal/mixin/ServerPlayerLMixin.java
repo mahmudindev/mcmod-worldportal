@@ -20,7 +20,7 @@ public abstract class ServerPlayerLMixin implements IEntity {
     private ResourceKey<Level> findDimensionEntryPointOverworldKey(
             ResourceKey<Level> original
     ) {
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             return null;
         }
 
@@ -35,7 +35,7 @@ public abstract class ServerPlayerLMixin implements IEntity {
             )
     )
     private ResourceKey<Level> findDimensionEntryPointEndKey(ResourceKey<Level> original) {
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             return null;
         }
 

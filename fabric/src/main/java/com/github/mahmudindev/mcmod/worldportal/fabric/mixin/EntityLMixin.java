@@ -36,7 +36,7 @@ public abstract class EntityLMixin implements IEntity {
             )
     )
     private ResourceKey<Level> changeDimensionEndPlatform(ResourceKey<Level> original) {
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             return null;
         }
 
@@ -57,7 +57,7 @@ public abstract class EntityLMixin implements IEntity {
             Operation<Vec3> original,
             @Local BlockState blockState
     ) {
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             return this.getRelativePortalPosition(
                     Direction.Axis.X,
                     BlockUtil.getLargestRectangleAround(

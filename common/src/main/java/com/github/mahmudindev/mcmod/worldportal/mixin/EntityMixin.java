@@ -3,7 +3,7 @@ package com.github.mahmudindev.mcmod.worldportal.mixin;
 import com.github.mahmudindev.mcmod.worldportal.base.IBlockPos;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
@@ -68,8 +68,8 @@ public abstract class EntityMixin implements IEntity {
             WorldBorder worldBorder,
             Operation<Optional<BlockUtil.FoundRectangle>> original
     ) {
-        PortalData portal = this.worldportal$getPortal();
-        if (portal != null) {
+        PortalConfig portalConfig = this.worldportal$getPortalConfig();
+        if (portalConfig != null) {
             ((IBlockPos) blockPos).worldportal$setLevel(this.level());
             ((IBlockPos) blockPos).worldportal$setPortalEntrancePos(this.portalEntrancePos);
             ((IBlockPos) blockPos).worldportal$setPortal(this.worldportal$getPortalId());
@@ -84,8 +84,8 @@ public abstract class EntityMixin implements IEntity {
     }
 
     @Override
-    public PortalData worldportal$getPortal() {
-        return PortalManager.getPortal(this.worldportal$getPortalId());
+    public PortalConfig worldportal$getPortalConfig() {
+        return PortalManager.getPortalConfig(this.worldportal$getPortalId());
     }
 
     @Override
@@ -144,16 +144,16 @@ public abstract class EntityMixin implements IEntity {
                 )).getBlock()
         );
 
-        Map<ResourceLocation, PortalData> portals = new HashMap<>();
+        Map<ResourceLocation, PortalConfig> portalConfigs = new HashMap<>();
 
-        PortalManager.getPortals().forEach((k, v) -> {
+        PortalManager.getPortalConfigs().forEach((k, v) -> {
             ResourceLocation mode = v.getModeLocation();
             if (hasHA) {
-                if (mode != null && !mode.equals(PortalData.DEFAULT_MODE)) {
+                if (mode != null && !mode.equals(PortalConfig.DEFAULT_MODE)) {
                     return;
                 }
             } else {
-                if (mode == null || !mode.equals(PortalData.HORIZONTAL_MODE)) {
+                if (mode == null || !mode.equals(PortalConfig.HORIZONTAL_MODE)) {
                     return;
                 }
             }
@@ -178,13 +178,13 @@ public abstract class EntityMixin implements IEntity {
                 return;
             }
 
-            portals.put(k, v);
+            portalConfigs.put(k, v);
         });
 
         IServerLevel serverLevelX = (IServerLevel) level;
         ResourceKey<Level> resourceKeyX = level.dimension();
 
-        if (!portals.isEmpty()) {
+        if (!portalConfigs.isEmpty()) {
             PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
             ResourceKey<Block> resourceKey = ResourceKey.create(
                     Registries.BLOCK,
@@ -207,7 +207,7 @@ public abstract class EntityMixin implements IEntity {
 
             ResourceKey<Level> resourceKeyZ = portalReturns.getDimension(minCornerPos);
             if (resourceKeyZ != null) {
-                for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+                for (Map.Entry<ResourceLocation, PortalConfig> entry : portalConfigs.entrySet()) {
                     ResourceKey<Level> resourceKeyV = entry.getValue().getDestinationKey();
                     if (resourceKeyX != resourceKeyV) {
                         continue;
@@ -228,7 +228,7 @@ public abstract class EntityMixin implements IEntity {
 
                 ResourceKey<Level> resourceKeyB = entry.getValue();
 
-                for (Map.Entry<ResourceLocation, PortalData> entryX : portals.entrySet()) {
+                for (Map.Entry<ResourceLocation, PortalConfig> entryX : portalConfigs.entrySet()) {
                     ResourceKey<Level> resourceKeyA = entryX.getValue().getDestinationKey();
                     if (resourceKeyX != resourceKeyA) {
                         continue;
@@ -244,15 +244,15 @@ public abstract class EntityMixin implements IEntity {
             }
         }
 
-        portals.keySet().removeIf(k -> {
-            return resourceKeyX == portals.get(k).getDestinationKey();
+        portalConfigs.keySet().removeIf(k -> {
+            return resourceKeyX == portalConfigs.get(k).getDestinationKey();
         });
 
-        if (!portals.isEmpty()) {
-            int random = level.getRandom().nextInt(portals.size());
+        if (!portalConfigs.isEmpty()) {
+            int random = level.getRandom().nextInt(portalConfigs.size());
 
             int i = 0;
-            for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+            for (Map.Entry<ResourceLocation, PortalConfig> entry : portalConfigs.entrySet()) {
                 if (i != random) {
                     i++;
 
