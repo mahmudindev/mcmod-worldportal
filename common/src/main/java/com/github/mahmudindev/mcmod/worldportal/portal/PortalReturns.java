@@ -74,4 +74,30 @@ public class PortalReturns extends SavedData {
 
         return portalReturns;
     }
+
+    public static PortalReturns migrate(CompoundTag compoundTag, PortalData portalData) {
+        PortalReturns portalReturns = new PortalReturns();
+
+        ListTag dimensions = compoundTag.getList("Dimensions", 10);
+        for(int i = 0; i < dimensions.size(); ++i) {
+            CompoundTag compoundTagX = dimensions.getCompound(i);
+            portalReturns.dimensions.put(
+                    new BlockPos(
+                            compoundTagX.getInt("PosX"),
+                            compoundTagX.getInt("PosY"),
+                            compoundTagX.getInt("PosZ")
+                    ),
+                    ResourceKey.create(
+                            Registries.DIMENSION,
+                            new ResourceLocation(compoundTagX.getString("Dimension"))
+                    )
+            );
+        }
+
+        portalReturns.dimensions.forEach(portalData::putDimension);
+        portalReturns.dimensions.clear();
+        portalReturns.setDirty();
+
+        return portalReturns;
+    }
 }

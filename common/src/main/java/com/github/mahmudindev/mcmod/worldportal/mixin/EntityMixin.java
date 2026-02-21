@@ -5,8 +5,7 @@ import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.BlockUtil;
@@ -185,14 +184,15 @@ public abstract class EntityMixin implements IEntity {
         ResourceKey<Level> resourceKeyX = level.dimension();
 
         if (!portalConfigs.isEmpty()) {
-            PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
+            PortalData portalData = serverLevelX.worldportal$getPortalData();
+
             ResourceKey<Block> resourceKey = ResourceKey.create(
                     Registries.BLOCK,
                     BuiltInRegistries.BLOCK.getKey(blockState.getBlock())
             );
             for (int i = 0; i < foundRectangle.axis1Size; i++) {
                 for (int j = 0; j < foundRectangle.axis2Size; j++) {
-                    portalPositions.putBlock(
+                    portalData.putBlock(
                             foundRectangle.minCorner.offset(
                                     axis == Direction.Axis.X ? i : 0,
                                     hasHA ? j : 0,
@@ -203,9 +203,7 @@ public abstract class EntityMixin implements IEntity {
                 }
             }
 
-            PortalReturns portalReturns = serverLevelX.worldportal$getPortalReturns();
-
-            ResourceKey<Level> resourceKeyZ = portalReturns.getDimension(minCornerPos);
+            ResourceKey<Level> resourceKeyZ = portalData.getDimension(minCornerPos);
             if (resourceKeyZ != null) {
                 for (Map.Entry<ResourceLocation, PortalConfig> entry : portalConfigs.entrySet()) {
                     ResourceKey<Level> resourceKeyV = entry.getValue().getDestinationKey();
@@ -219,7 +217,7 @@ public abstract class EntityMixin implements IEntity {
                 }
             }
 
-            Map<BlockPos, ResourceKey<Level>> dimensions = portalReturns.getDimensions();
+            Map<BlockPos, ResourceKey<Level>> dimensions = portalData.getDimensions();
             for (Map.Entry<BlockPos, ResourceKey<Level>> entry : dimensions.entrySet()) {
                 BlockPos minCornerPosX = entry.getKey();
                 if (this.portalEntrancePos.distSqr(minCornerPosX) > 128) {
@@ -234,8 +232,8 @@ public abstract class EntityMixin implements IEntity {
                         continue;
                     }
 
-                    portalReturns.putDimension(minCornerPos, resourceKeyB);
-                    portalReturns.removeDimension(minCornerPosX);
+                    portalData.putDimension(minCornerPos, resourceKeyB);
+                    portalData.removeDimension(minCornerPosX);
 
                     this.worldportal$setPortal(entryX.getKey());
 

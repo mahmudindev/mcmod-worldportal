@@ -2,8 +2,7 @@ package com.github.mahmudindev.mcmod.worldportal.forge.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -82,14 +81,15 @@ public abstract class EntityMixin implements IEntity {
 
             IServerLevel serverLevelX = (IServerLevel) serverLevel;
 
-            PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
+            PortalData portalData = serverLevelX.worldportal$getPortalData();
+
             ResourceKey<Block> resourceKey = ResourceKey.create(
                     Registries.BLOCK,
                     BuiltInRegistries.BLOCK.getKey(blockState.getBlock())
             );
             for (int i = 0; i < portalRectangle.axis1Size; i++) {
                 for (int j = 0; j < portalRectangle.axis2Size; j++) {
-                    portalPositions.putBlock(
+                    portalData.putBlock(
                             portalRectangle.minCorner.offset(
                                     axis == Direction.Axis.X ? i : 0,
                                     hasHA ? j : 0,
@@ -100,11 +100,7 @@ public abstract class EntityMixin implements IEntity {
                 }
             }
 
-            PortalReturns portalReturns = serverLevelX.worldportal$getPortalReturns();
-            portalReturns.putDimension(
-                    portalRectangle.minCorner,
-                    this.level().dimension()
-            );
+            portalData.putDimension(portalRectangle.minCorner, this.level().dimension());
         }
 
         return portalInfo;
