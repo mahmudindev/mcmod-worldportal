@@ -1,7 +1,6 @@
 package com.github.mahmudindev.mcmod.worldportal;
 
 import com.github.mahmudindev.mcmod.worldportal.config.Config;
-import com.github.mahmudindev.mcmod.worldportal.core.WorldPortalPoiTypes;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.mojang.logging.LogUtils;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -13,8 +12,6 @@ public final class WorldPortal {
 
     public static void init() {
         Config.load();
-
-        WorldPortalPoiTypes.bootstrap();
     }
 
     public static void onResourceManagerReload(ResourceManager resourceManager) {
