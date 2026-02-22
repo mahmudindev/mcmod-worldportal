@@ -4,6 +4,7 @@ import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -11,11 +12,13 @@ import net.minecraft.util.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.portal.TeleportTransition;
@@ -74,6 +77,24 @@ public abstract class EntityMixin implements IEntity {
             );
 
             IServerLevel serverLevelX = (IServerLevel) serverLevel;
+
+            PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
+            ResourceKey<Block> resourceKey = ResourceKey.create(
+                    Registries.BLOCK,
+                    BuiltInRegistries.BLOCK.getKey(blockState.getBlock())
+            );
+            for (int i = 0; i < foundRectangle.axis1Size; i++) {
+                for (int j = 0; j < foundRectangle.axis2Size; j++) {
+                    portalPositions.putBlock(
+                            foundRectangle.minCorner.offset(
+                                    axis == Direction.Axis.X ? i : 0,
+                                    hasHA ? j : 0,
+                                    hasHA ? axis == Direction.Axis.Z ? i : 0 : j
+                            ),
+                            resourceKey
+                    );
+                }
+            }
 
             PortalReturns portalReturns = serverLevelX.worldportal$getPortalReturns();
             portalReturns.putDimension(
@@ -202,6 +223,24 @@ public abstract class EntityMixin implements IEntity {
         PortalReturns portalReturns = serverLevelX.worldportal$getPortalReturns();
 
         if (!portals.isEmpty()) {
+            PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
+            ResourceKey<Block> resourceKey = ResourceKey.create(
+                    Registries.BLOCK,
+                    BuiltInRegistries.BLOCK.getKey(blockState.getBlock())
+            );
+            for (int i = 0; i < foundRectangle.axis1Size; i++) {
+                for (int j = 0; j < foundRectangle.axis2Size; j++) {
+                    portalPositions.putBlock(
+                            foundRectangle.minCorner.offset(
+                                    axis == Direction.Axis.X ? i : 0,
+                                    hasHA ? j : 0,
+                                    hasHA ? axis == Direction.Axis.Z ? i : 0 : j
+                            ),
+                            resourceKey
+                    );
+                }
+            }
+
             ResourceKey<Level> resourceKeyZ = portalReturns.getDimension(minCornerPos);
             if (resourceKeyZ != null) {
                 for (Map.Entry<Identifier, PortalData> entry : portals.entrySet()) {
@@ -241,7 +280,9 @@ public abstract class EntityMixin implements IEntity {
             }
         }
 
-        portals.keySet().removeIf(k -> resourceKeyX == portals.get(k).getDestinationKey());
+        portals.keySet().removeIf(k -> {
+            return resourceKeyX == portals.get(k).getDestinationKey();
+        });
 
         if (!portals.isEmpty()) {
             int random = level.getRandom().nextInt(portals.size());

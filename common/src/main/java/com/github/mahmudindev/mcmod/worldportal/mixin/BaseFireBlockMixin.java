@@ -1,12 +1,18 @@
 package com.github.mahmudindev.mcmod.worldportal.mixin;
 
+import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -165,13 +171,21 @@ public abstract class BaseFireBlockMixin {
             }
         }
 
+        IServerLevel serverLevelX = (IServerLevel) level;
+        PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
+        Block block = Blocks.END_PORTAL;
+        ResourceKey<Block> resourceKey = ResourceKey.create(
+                Registries.BLOCK,
+                BuiltInRegistries.BLOCK.getKey(block)
+        );
+
         for (int x = 0; x < distanceE; x++) {
             for (int z = 0; z < distanceS; z++) {
-                level.setBlock(
-                        blockPosX.offset(x, 0, z),
-                        Blocks.END_PORTAL.defaultBlockState(),
-                        18
-                );
+                BlockPos blockPosZ = blockPosX.offset(x, 0, z);
+
+                level.setBlock(blockPosZ, block.defaultBlockState(), 18);
+
+                portalPositions.putBlock(blockPosZ, resourceKey);
             }
         }
     }
