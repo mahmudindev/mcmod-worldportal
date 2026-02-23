@@ -1,7 +1,7 @@
 package com.github.mahmudindev.mcmod.worldportal.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IBlockPos;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -44,8 +44,8 @@ public abstract class BlockPosMixin implements IBlockPos {
     }
 
     @Override
-    public PortalData worldportal$getPortal() {
-        return PortalManager.getPortal(this.worldportal$getPortalId());
+    public PortalConfig worldportal$getPortalConfig() {
+        return PortalManager.getPortalConfig(this.worldportal$getPortalId());
     }
 
     @Override

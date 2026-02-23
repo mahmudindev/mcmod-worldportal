@@ -1,6 +1,6 @@
 package com.github.mahmudindev.mcmod.worldportal.base;
 
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -9,7 +9,7 @@ import net.minecraft.world.level.Level;
 public interface IEntity {
     ResourceLocation worldportal$getPortalId();
 
-    PortalData worldportal$getPortal();
+    PortalConfig worldportal$getPortalConfig();
 
     void worldportal$setPortal(ResourceLocation portalId);
 

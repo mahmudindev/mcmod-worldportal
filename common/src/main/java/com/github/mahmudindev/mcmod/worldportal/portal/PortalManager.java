@@ -12,13 +12,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PortalManager {
-    private static final Map<ResourceLocation, PortalData> PORTALS = new HashMap<>();
+    private static final Map<ResourceLocation, PortalConfig> PORTAL_CONFIGS = new HashMap<>();
 
     public static void onResourceManagerReload(ResourceManager manager) {
-        PORTALS.clear();
+        PORTAL_CONFIGS.clear();
 
         Config config = Config.getConfig();
-        config.getPortals().forEach((id, portal) -> setPortal(
+        config.getPortals().forEach((id, portal) -> setPortalConfig(
                 ResourceLocation.parse(id),
                 portal
         ));
@@ -42,9 +42,9 @@ public class PortalManager {
                         .substring(resourcePath.indexOf("/") + 1)
                         .replaceAll("\\.json$", "");
 
-                setPortal(resourceLocation.withPath(portalPath), gson.fromJson(
+                setPortalConfig(resourceLocation.withPath(portalPath), gson.fromJson(
                         JsonParser.parseReader(resource.openAsReader()),
-                        PortalData.class
+                        PortalConfig.class
                 ));
             } catch (IOException e) {
                 WorldPortal.LOGGER.error("Failed to read datapack", e);
@@ -52,15 +52,15 @@ public class PortalManager {
         });
     }
 
-    public static Map<ResourceLocation, PortalData> getPortals() {
-        return Map.copyOf(PORTALS);
+    public static Map<ResourceLocation, PortalConfig> getPortalConfigs() {
+        return Map.copyOf(PORTAL_CONFIGS);
     }
 
-    public static PortalData getPortal(ResourceLocation id) {
-        return PORTALS.get(id);
+    public static PortalConfig getPortalConfig(ResourceLocation id) {
+        return PORTAL_CONFIGS.get(id);
     }
 
-    public static void setPortal(ResourceLocation id, PortalData portal) {
-        PORTALS.put(id, portal);
+    public static void setPortalConfig(ResourceLocation id, PortalConfig portalConfig) {
+        PORTAL_CONFIGS.put(id, portalConfig);
     }
 }
