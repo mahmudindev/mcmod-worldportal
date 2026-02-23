@@ -308,14 +308,14 @@ public abstract class PortalForcerLMixin {
                 .hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
         hasHARef.set(hasHA);
 
-        Optional<BlockUtil.FoundRectangle> optional = original.call(blockPos, axis);
-        if (optional.isEmpty()) {
-            return optional;
+        Optional<BlockUtil.FoundRectangle> oFoundRectangle = original.call(blockPos, axis);
+        if (oFoundRectangle.isEmpty()) {
+            return oFoundRectangle;
         }
 
         PortalData portal = ((IBlockPos) blockPos).worldportal$getPortal();
         if (portal != null) {
-            BlockUtil.FoundRectangle foundRectangle = optional.get();
+            BlockUtil.FoundRectangle foundRectangle = oFoundRectangle.get();
 
             Direction.Axis AxisX = Direction.Axis.X;
             Direction.Axis AxisZ = Direction.Axis.Z;
@@ -360,7 +360,7 @@ public abstract class PortalForcerLMixin {
             }
         }
 
-        return optional;
+        return oFoundRectangle;
     }
 
     @WrapOperation(
