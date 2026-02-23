@@ -12,13 +12,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PortalManager {
-    private static final Map<Identifier, PortalData> PORTALS = new HashMap<>();
+    private static final Map<Identifier, PortalConfig> PORTAL_CONFIGS = new HashMap<>();
 
     public static void onResourceManagerReload(ResourceManager manager) {
-        PORTALS.clear();
+        PORTAL_CONFIGS.clear();
 
         Config config = Config.getConfig();
-        config.getPortals().forEach((id, portal) -> setPortal(
+        config.getPortals().forEach((id, portal) -> setPortalConfig(
                 Identifier.parse(id),
                 portal
         ));
@@ -42,9 +42,9 @@ public class PortalManager {
                         .substring(resourcePath.indexOf("/") + 1)
                         .replaceAll("\\.json$", "");
 
-                setPortal(identifier.withPath(portalPath), gson.fromJson(
+                setPortalConfig(identifier.withPath(portalPath), gson.fromJson(
                         JsonParser.parseReader(resource.openAsReader()),
-                        PortalData.class
+                        PortalConfig.class
                 ));
             } catch (IOException e) {
                 WorldPortal.LOGGER.error("Failed to read datapack", e);
@@ -52,15 +52,15 @@ public class PortalManager {
         });
     }
 
-    public static Map<Identifier, PortalData> getPortals() {
-        return Map.copyOf(PORTALS);
+    public static Map<Identifier, PortalConfig> getPortalConfigs() {
+        return Map.copyOf(PORTAL_CONFIGS);
     }
 
-    public static PortalData getPortal(Identifier id) {
-        return PORTALS.get(id);
+    public static PortalConfig getPortalConfig(Identifier id) {
+        return PORTAL_CONFIGS.get(id);
     }
 
-    public static void setPortal(Identifier id, PortalData portal) {
-        PORTALS.put(id, portal);
+    public static void setPortalConfig(Identifier id, PortalConfig portalConfig) {
+        PORTAL_CONFIGS.put(id, portalConfig);
     }
 }

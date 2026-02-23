@@ -106,7 +106,7 @@ public abstract class NetherPortalBlockLMixin {
             Entity entity,
             BlockPos blockPos
     ) {
-        if (((IEntity) entity).worldportal$getPortal() != null) {
+        if (((IEntity) entity).worldportal$getPortalConfig() != null) {
             Level level = entity.level();
             BlockState blockState = level.getBlockState(blockPos);
 

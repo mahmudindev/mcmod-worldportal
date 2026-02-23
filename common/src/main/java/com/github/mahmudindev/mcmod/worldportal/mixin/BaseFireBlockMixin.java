@@ -1,7 +1,7 @@
 package com.github.mahmudindev.mcmod.worldportal.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
 import net.minecraft.core.BlockPos;
@@ -42,16 +42,16 @@ public abstract class BaseFireBlockMixin {
     ) {
         boolean inPortalDimension = false;
 
-        Map<Identifier, PortalData> portals = PortalManager.getPortals();
-        for (Map.Entry<Identifier, PortalData> entry : portals.entrySet()) {
+        Map<Identifier, PortalConfig> portalConfigs = PortalManager.getPortalConfigs();
+        for (Map.Entry<Identifier, PortalConfig> entry : portalConfigs.entrySet()) {
             if (inPortalDimension) {
                 break;
             }
 
-            PortalData portal = entry.getValue();
+            PortalConfig portal = entry.getValue();
 
             Identifier mode = portal.getModeLocation();
-            if (mode == null || !mode.equals(PortalData.HORIZONTAL_MODE)) {
+            if (mode == null || !mode.equals(PortalConfig.HORIZONTAL_MODE)) {
                 continue;
             }
 

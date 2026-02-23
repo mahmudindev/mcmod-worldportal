@@ -2,7 +2,7 @@ package com.github.mahmudindev.mcmod.worldportal.mixin;
 
 import com.github.mahmudindev.mcmod.worldportal.base.IBlockPos;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.util.BlockUtil;
@@ -39,8 +39,8 @@ public abstract class NetherPortalBlockMixin {
     ) {
         IEntity entityX = (IEntity) entity;
 
-        PortalData portal = entityX.worldportal$getPortal();
-        if (portal != null) {
+        PortalConfig portalConfig = entityX.worldportal$getPortalConfig();
+        if (portalConfig != null) {
             ((IBlockPos) blockPos).worldportal$setLevel(entity.level());
             ((IBlockPos) blockPos).worldportal$setPortalEntrancePos(blockPos2);
             ((IBlockPos) blockPos).worldportal$setPortal(entityX.worldportal$getPortalId());
@@ -67,8 +67,8 @@ public abstract class NetherPortalBlockMixin {
     ) {
         IEntity entityX = (IEntity) entity;
 
-        PortalData portal = entityX.worldportal$getPortal();
-        if (portal != null) {
+        PortalConfig portalConfig = entityX.worldportal$getPortalConfig();
+        if (portalConfig != null) {
             ((IBlockPos) blockPos).worldportal$setLevel(entity.level());
             ((IBlockPos) blockPos).worldportal$setPortalEntrancePos(blockPos2);
             ((IBlockPos) blockPos).worldportal$setPortal(entityX.worldportal$getPortalId());
