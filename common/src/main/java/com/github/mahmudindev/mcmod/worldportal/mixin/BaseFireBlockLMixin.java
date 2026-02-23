@@ -1,6 +1,6 @@
 package com.github.mahmudindev.mcmod.worldportal.mixin;
 
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -25,16 +25,16 @@ public abstract class BaseFireBlockLMixin {
         Boolean inPortalDimension = original.call(level);
 
         if (!inPortalDimension) {
-            Map<ResourceLocation, PortalData> portals = PortalManager.getPortals();
-            for (Map.Entry<ResourceLocation, PortalData> entry : portals.entrySet()) {
+            Map<ResourceLocation, PortalConfig> portalConfigs = PortalManager.getPortalConfigs();
+            for (Map.Entry<ResourceLocation, PortalConfig> entry : portalConfigs.entrySet()) {
                 if (inPortalDimension) {
                     break;
                 }
 
-                PortalData portal = entry.getValue();
+                PortalConfig portal = entry.getValue();
 
                 ResourceLocation mode = portal.getModeLocation();
-                if (mode != null && !mode.equals(PortalData.DEFAULT_MODE)) {
+                if (mode != null && !mode.equals(PortalConfig.DEFAULT_MODE)) {
                     continue;
                 }
 
