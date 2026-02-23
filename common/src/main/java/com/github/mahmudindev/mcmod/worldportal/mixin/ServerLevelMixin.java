@@ -1,6 +1,6 @@
 package com.github.mahmudindev.mcmod.worldportal.mixin;
 
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalReturns;
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import net.minecraft.resources.ResourceKey;
@@ -29,7 +29,7 @@ public abstract class ServerLevelMixin implements IServerLevel {
     @Unique
     private PortalReturns portalReturns;
     @Unique
-    private PortalPositions portalPositions;
+    private PortalData portalData;
 
     @Shadow public abstract DimensionDataStorage getDataStorage();
 
@@ -49,13 +49,13 @@ public abstract class ServerLevelMixin implements IServerLevel {
             RandomSequences randomSequences,
             CallbackInfo ci
     ) {
-        this.portalReturns = this.getDataStorage().computeIfAbsent(
-                PortalReturns.factory(),
-                PortalReturns.FIELD
+        this.portalData = this.getDataStorage().computeIfAbsent(
+                PortalData.factory(),
+                PortalData.FIELD
         );
-        this.portalPositions = this.getDataStorage().computeIfAbsent(
-                PortalPositions.factory(),
-                PortalPositions.FIELD
+        this.portalReturns = this.getDataStorage().computeIfAbsent(
+                PortalReturns.factory(this.portalData),
+                PortalReturns.FIELD
         );
     }
 
@@ -65,7 +65,7 @@ public abstract class ServerLevelMixin implements IServerLevel {
     }
 
     @Override
-    public PortalPositions worldportal$getPortalPositions() {
-        return this.portalPositions;
+    public PortalData worldportal$getPortalData() {
+        return this.portalData;
     }
 }

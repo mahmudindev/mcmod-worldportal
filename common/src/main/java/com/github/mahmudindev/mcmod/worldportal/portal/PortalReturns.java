@@ -54,10 +54,10 @@ public class PortalReturns extends SavedData {
         this.setDirty();
     }
 
-    public static SavedData.Factory<PortalReturns> factory() {
+    public static SavedData.Factory<PortalReturns> factory(PortalData portalData) {
         return new SavedData.Factory<>(
                 PortalReturns::new,
-                (compoundTag, provider) -> load(compoundTag),
+                (compoundTag, provider) -> migrate(compoundTag, portalData),
                 null
         );
     }
@@ -80,6 +80,32 @@ public class PortalReturns extends SavedData {
                     )
             );
         }
+
+        return portalReturns;
+    }
+
+    public static PortalReturns migrate(CompoundTag compoundTag, PortalData portalData) {
+        PortalReturns portalReturns = new PortalReturns();
+
+        ListTag dimensions = compoundTag.getList("Dimensions", 10);
+        for(int i = 0; i < dimensions.size(); ++i) {
+            CompoundTag compoundTagX = dimensions.getCompound(i);
+            portalReturns.dimensions.put(
+                    new BlockPos(
+                            compoundTagX.getInt("PosX"),
+                            compoundTagX.getInt("PosY"),
+                            compoundTagX.getInt("PosZ")
+                    ),
+                    ResourceKey.create(
+                            Registries.DIMENSION,
+                            ResourceLocation.parse(compoundTagX.getString("Dimension"))
+                    )
+            );
+        }
+
+        portalReturns.dimensions.forEach(portalData::putDimension);
+        portalReturns.dimensions.clear();
+        portalReturns.setDirty();
 
         return portalReturns;
     }
