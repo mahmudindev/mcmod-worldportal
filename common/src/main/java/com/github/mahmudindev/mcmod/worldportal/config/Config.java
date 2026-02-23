@@ -1,7 +1,7 @@
 package com.github.mahmudindev.mcmod.worldportal.config;
 
 import com.github.mahmudindev.mcmod.worldportal.WorldPortalExpectPlatform;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,29 +18,29 @@ public class Config {
     private static final Path CONFIG_DIR = WorldPortalExpectPlatform.getConfigDir();
     private static Config CONFIG = new Config();
 
-    private final Map<String, PortalData> portals = new HashMap<>();
+    private final Map<String, PortalConfig> portals = new HashMap<>();
 
     private void defaults() {
-        PortalData portal0 = new PortalData();
+        PortalConfig portal0 = new PortalConfig();
         portal0.setFrameTopRight("minecraft:gold_block");
         portal0.setFrameTopLeft("minecraft:iron_block");
         portal0.setFrameBottomRight("minecraft:iron_block");
         portal0.setFrameBottomLeft("minecraft:gold_block");
-        portal0.setMode(String.valueOf(PortalData.DEFAULT_MODE));
+        portal0.setMode(String.valueOf(PortalConfig.DEFAULT_MODE));
         portal0.setDestination(WorldPortal.MOD_ID + ":dimension");
         this.portals.put(WorldPortal.MOD_ID + ":default", portal0);
 
-        PortalData portal1 = new PortalData();
+        PortalConfig portal1 = new PortalConfig();
         portal1.setFrameTopRight("minecraft:gold_block");
         portal1.setFrameTopLeft("minecraft:iron_block");
         portal1.setFrameBottomRight("minecraft:iron_block");
         portal1.setFrameBottomLeft("minecraft:gold_block");
-        portal1.setMode(String.valueOf(PortalData.DEFAULT_MODE));
+        portal1.setMode(String.valueOf(PortalConfig.DEFAULT_MODE));
         portal1.setDestination(WorldPortal.MOD_ID + ":dimension");
         this.portals.put(WorldPortal.MOD_ID + ":horizontal", portal1);
     }
 
-    public Map<String, PortalData> getPortals() {
+    public Map<String, PortalConfig> getPortals() {
         return Map.copyOf(this.portals);
     }
 

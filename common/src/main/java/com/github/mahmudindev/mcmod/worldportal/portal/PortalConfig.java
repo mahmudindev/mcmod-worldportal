@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
-public class PortalData {
+public class PortalConfig {
     public static final ResourceLocation DEFAULT_MODE = ResourceLocation.tryBuild(
             WorldPortal.MOD_ID,
             "default"
