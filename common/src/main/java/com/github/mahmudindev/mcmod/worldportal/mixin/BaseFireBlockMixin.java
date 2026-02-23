@@ -3,7 +3,7 @@ package com.github.mahmudindev.mcmod.worldportal.mixin;
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -172,7 +172,7 @@ public abstract class BaseFireBlockMixin {
         }
 
         IServerLevel serverLevelX = (IServerLevel) level;
-        PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
+        PortalData portalData = serverLevelX.worldportal$getPortalData();
         Block block = Blocks.END_PORTAL;
         ResourceKey<Block> resourceKey = ResourceKey.create(
                 Registries.BLOCK,
@@ -185,7 +185,7 @@ public abstract class BaseFireBlockMixin {
 
                 level.setBlock(blockPosZ, block.defaultBlockState(), 18);
 
-                portalPositions.putBlock(blockPosZ, resourceKey);
+                portalData.putBlock(blockPosZ, resourceKey);
             }
         }
     }

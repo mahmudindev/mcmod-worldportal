@@ -5,7 +5,7 @@ import com.github.mahmudindev.mcmod.worldportal.base.IBlockPos;
 import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
-import com.github.mahmudindev.mcmod.worldportal.portal.PortalPositions;
+import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -77,7 +77,7 @@ public abstract class PortalForcerLMixin {
         );
 
         IServerLevel serverLevelX = (IServerLevel) this.level;
-        PortalPositions portalPositions = serverLevelX.worldportal$getPortalPositions();
+        PortalData portalData = serverLevelX.worldportal$getPortalData();
         ResourceKey<Block> blockResourceKey = ResourceKey.create(
                 Registries.BLOCK,
                 BuiltInRegistries.BLOCK.getKey(Blocks.NETHER_PORTAL)
@@ -95,7 +95,7 @@ public abstract class PortalForcerLMixin {
                 chunkPos,
                 height
         ).blocksInside()).map(blockPosX -> {
-            ResourceKey<Block> blockResourceKeyX = portalPositions.getBlock(blockPosX);
+            ResourceKey<Block> blockResourceKeyX = portalData.getBlock(blockPosX);
 
             if (blockResourceKeyX == null || blockResourceKeyX == blockResourceKey) {
                 return null;
@@ -107,7 +107,7 @@ public abstract class PortalForcerLMixin {
                     Registries.BLOCK,
                     BuiltInRegistries.BLOCK.getKey(blockState.getBlock())
             ) != blockResourceKeyX) {
-                portalPositions.removeBlock(blockPosX);
+                portalData.removeBlock(blockPosX);
 
                 return null;
             }
