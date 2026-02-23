@@ -36,7 +36,7 @@ public abstract class EntityLMixin implements IEntity {
     ) {
         Vec3 vec3X = original.call(foundRectangle, axis, vec3, entityDimensions);
 
-        if (this.worldportal$getPortal() != null) {
+        if (this.worldportal$getPortalConfig() != null) {
             BlockPos blockPos = foundRectangle.minCorner;
 
             BlockState blockState = this.level().getBlockState(blockPos);
