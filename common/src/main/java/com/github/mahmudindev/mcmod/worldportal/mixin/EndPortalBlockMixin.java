@@ -28,12 +28,12 @@ public abstract class EndPortalBlockMixin {
             cancellable = true
     )
     private void entityInsidePrepare(
-            BlockState blockState,
+            BlockState state,
             Level level,
-            BlockPos blockPos,
+            BlockPos pos,
             Entity entity,
-            InsideBlockEffectApplier insideBlockEffectApplier,
-            boolean bl,
+            InsideBlockEffectApplier effectApplier,
+            boolean isPrecise,
             CallbackInfo ci
     ) {
         if (entity.isOnPortalCooldown()) {
@@ -43,24 +43,24 @@ public abstract class EndPortalBlockMixin {
             return;
         }
 
-        BlockUtil.FoundRectangle foundRectangle = BlockUtil.getLargestRectangleAround(
-                blockPos,
+        BlockUtil.FoundRectangle largestRectangleAround = BlockUtil.getLargestRectangleAround(
+                pos,
                 Direction.Axis.X,
                 21,
                 Direction.Axis.Z,
                 21,
-                blockPosX -> level.getBlockState(blockPosX) == blockState
+                posX -> level.getBlockState(posX) == state
         );
 
-        for (int x = 0; x < foundRectangle.axis1Size; x++) {
-            for (int z = 0; z < foundRectangle.axis2Size; z++) {
-                BlockPos blockPosH = foundRectangle.minCorner.offset(x, 0, z);
+        for (int x = 0; x < largestRectangleAround.axis1Size; x++) {
+            for (int z = 0; z < largestRectangleAround.axis2Size; z++) {
+                BlockPos posH = largestRectangleAround.minCorner.offset(x, 0, z);
 
                 for (Map.Entry<BlockPos, Boolean> entry : Map.of(
-                        blockPosH.west(), x == 0,
-                        blockPosH.east(), x == foundRectangle.axis1Size - 1,
-                        blockPosH.north(), z == 0,
-                        blockPosH.south(), z == foundRectangle.axis2Size - 1
+                        posH.west(), x == 0,
+                        posH.east(), x == largestRectangleAround.axis1Size - 1,
+                        posH.north(), z == 0,
+                        posH.south(), z == largestRectangleAround.axis2Size - 1
                 ).entrySet()) {
                     if (!entry.getValue()) {
                         continue;
@@ -73,7 +73,7 @@ public abstract class EndPortalBlockMixin {
             }
         }
 
-        entity.setAsInsidePortal((Portal) Blocks.NETHER_PORTAL, blockPos);
+        entity.setAsInsidePortal((Portal) Blocks.NETHER_PORTAL, pos);
         ci.cancel();
     }
 }

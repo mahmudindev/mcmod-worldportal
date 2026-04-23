@@ -1,34 +1,34 @@
 modLoader = "javafml"
-loaderVersion = "[4,)"
+loaderVersion = "${neoforge_loader_version_range}"
 issueTrackerURL = "https://github.com/mahmudindev/mcmod-worldportal/issues"
-license = "ARR"
+license = "${mod_license}"
 
 [[mods]]
-modId = "worldportal"
+modId = "${mod_id}"
 version = "${version}"
-displayName = "World Portal"
-authors = "mahmudindev"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
 description = '''
-Create custom world portal to travel between dimensions.
+${description}
 '''
-logoFile = "assets/worldportal/icon.png"
+logoFile = "assets/${mod_id}/icon.png"
 
-[[dependencies.worldportal]]
+[[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.11,)"
+versionRange = "${neoforge_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.worldportal]]
+[[dependencies.${mod_id}]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.11,)"
+versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
 [[mixins]]
-config = "worldportal.mixins.json"
+config = "${mod_id}.mixins.json"
 
 ["lithium:options"]
 "mixin.ai.poi.fast_portals" = false

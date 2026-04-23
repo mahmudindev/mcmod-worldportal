@@ -20,7 +20,7 @@ public final class WorldPortalFabric implements ModInitializer {
 
         ResourceLoader
                 .get(PackType.SERVER_DATA)
-                .registerReloader(Identifier.fromNamespaceAndPath(
+                .registerReloadListener(Identifier.fromNamespaceAndPath(
                         WorldPortal.MOD_ID,
                         "default"
                 ), new ResourceManagerReloadListener() {

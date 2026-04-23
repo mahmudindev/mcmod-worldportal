@@ -47,32 +47,32 @@ public abstract class EntityMixin implements IEntity {
     )
     private Entity handlePortalChangeDimensionFinish(
             Entity instance,
-            TeleportTransition teleportTransition,
+            TeleportTransition transition,
             Operation<Entity> original
     ) {
         PortalConfig portalConfig = this.worldportal$getPortalConfig();
         if (portalConfig != null) {
-            ServerLevel serverLevel = teleportTransition.newLevel();
+            ServerLevel serverLevel = transition.newLevel();
 
             ResourceKey<Level> dimension = serverLevel.dimension();
             if (dimension != portalConfig.getDestinationKey()) {
-                return original.call(instance, teleportTransition);
+                return original.call(instance, transition);
             }
 
-            BlockPos blockPos = BlockPos.containing(teleportTransition.position());
+            BlockPos pos = BlockPos.containing(transition.position());
 
-            BlockState blockState = serverLevel.getBlockState(blockPos);
-            boolean hasHA = blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
+            BlockState state = serverLevel.getBlockState(pos);
+            boolean hasHA = state.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
             Direction.Axis axis = hasHA
-                    ? blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS)
+                    ? state.getValue(BlockStateProperties.HORIZONTAL_AXIS)
                     : Direction.Axis.X;
-            BlockUtil.FoundRectangle foundRectangle = BlockUtil.getLargestRectangleAround(
-                    blockPos,
+            BlockUtil.FoundRectangle largestRectangleAround = BlockUtil.getLargestRectangleAround(
+                    pos,
                     axis,
                     21,
                     hasHA ? Direction.Axis.Y : Direction.Axis.X,
                     21,
-                    blockPosX -> serverLevel.getBlockState(blockPosX) == blockState
+                    posX -> serverLevel.getBlockState(posX) == state
             );
 
             IServerLevel serverLevelX = (IServerLevel) serverLevel;
@@ -80,12 +80,12 @@ public abstract class EntityMixin implements IEntity {
             PortalData portalData = serverLevelX.worldportal$getPortalData();
             ResourceKey<Block> resourceKey = ResourceKey.create(
                     Registries.BLOCK,
-                    BuiltInRegistries.BLOCK.getKey(blockState.getBlock())
+                    BuiltInRegistries.BLOCK.getKey(state.getBlock())
             );
-            for (int i = 0; i < foundRectangle.axis1Size; i++) {
-                for (int j = 0; j < foundRectangle.axis2Size; j++) {
+            for (int i = 0; i < largestRectangleAround.axis1Size; i++) {
+                for (int j = 0; j < largestRectangleAround.axis2Size; j++) {
                     portalData.putBlock(
-                            foundRectangle.minCorner.offset(
+                            largestRectangleAround.minCorner.offset(
                                     axis == Direction.Axis.X ? i : 0,
                                     hasHA ? j : 0,
                                     hasHA ? axis == Direction.Axis.Z ? i : 0 : j
@@ -95,10 +95,10 @@ public abstract class EntityMixin implements IEntity {
                 }
             }
 
-            portalData.putDimension(foundRectangle.minCorner, this.level().dimension());
+            portalData.putDimension(largestRectangleAround.minCorner, this.level().dimension());
         }
 
-        return original.call(instance, teleportTransition);
+        return original.call(instance, transition);
     }
 
     @Inject(method = "handlePortal", at = @At(value = "RETURN"))
@@ -123,32 +123,32 @@ public abstract class EntityMixin implements IEntity {
 
     @Override
     public ResourceKey<Level> worldportal$setupPortal(
-            BlockPos blockPos,
+            BlockPos pos,
             ResourceKey<Level> originalKey
     ) {
         Level level = this.level();
 
-        BlockState blockState = level.getBlockState(blockPos);
-        boolean hasHA = blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
+        BlockState state = level.getBlockState(pos);
+        boolean hasHA = state.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
         Direction.Axis axis = hasHA
-                ? blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS)
+                ? state.getValue(BlockStateProperties.HORIZONTAL_AXIS)
                 : Direction.Axis.X;
-        BlockUtil.FoundRectangle foundRectangle = BlockUtil.getLargestRectangleAround(
-                blockPos,
+        BlockUtil.FoundRectangle largestRectangleAround = BlockUtil.getLargestRectangleAround(
+                pos,
                 axis,
                 21,
                 hasHA ? Direction.Axis.Y : Direction.Axis.Z,
                 21,
-                blockPosX -> level.getBlockState(blockPosX) == blockState
+                posX -> level.getBlockState(posX) == state
         );
 
-        BlockPos minCornerPos = foundRectangle.minCorner;
+        BlockPos minCornerPos = largestRectangleAround.minCorner;
 
         Identifier frameC1 = BuiltInRegistries.BLOCK.getKey(
                 level.getBlockState(minCornerPos.offset(
-                        axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
+                        axis == Direction.Axis.X ? largestRectangleAround.axis1Size : 0,
                         hasHA ? -1 : 0,
-                        hasHA ? axis == Direction.Axis.Z ? foundRectangle.axis1Size : 0 : -1
+                        hasHA ? axis == Direction.Axis.Z ? largestRectangleAround.axis1Size : 0 : -1
                 )).getBlock()
         );
         Identifier frameC2 = BuiltInRegistries.BLOCK.getKey(
@@ -160,18 +160,18 @@ public abstract class EntityMixin implements IEntity {
         );
         Identifier frameC3 = BuiltInRegistries.BLOCK.getKey(
                 level.getBlockState(minCornerPos.offset(
-                        axis == Direction.Axis.X ? foundRectangle.axis1Size : 0,
-                        hasHA ? foundRectangle.axis2Size : 0,
+                        axis == Direction.Axis.X ? largestRectangleAround.axis1Size : 0,
+                        hasHA ? largestRectangleAround.axis2Size : 0,
                         hasHA ? axis == Direction.Axis.Z
-                                ? foundRectangle.axis1Size
-                                : 0 : foundRectangle.axis2Size
+                                ? largestRectangleAround.axis1Size
+                                : 0 : largestRectangleAround.axis2Size
                 )).getBlock()
         );
         Identifier frameC4 = BuiltInRegistries.BLOCK.getKey(
                 level.getBlockState(minCornerPos.offset(
                         axis == Direction.Axis.X ? -1 : 0,
-                        hasHA ? foundRectangle.axis2Size : 0,
-                        hasHA ? axis == Direction.Axis.Z ? -1 : 0 : foundRectangle.axis2Size
+                        hasHA ? largestRectangleAround.axis2Size : 0,
+                        hasHA ? axis == Direction.Axis.Z ? -1 : 0 : largestRectangleAround.axis2Size
                 )).getBlock()
         );
 
@@ -220,12 +220,12 @@ public abstract class EntityMixin implements IEntity {
 
             ResourceKey<Block> resourceKey = ResourceKey.create(
                     Registries.BLOCK,
-                    BuiltInRegistries.BLOCK.getKey(blockState.getBlock())
+                    BuiltInRegistries.BLOCK.getKey(state.getBlock())
             );
-            for (int i = 0; i < foundRectangle.axis1Size; i++) {
-                for (int j = 0; j < foundRectangle.axis2Size; j++) {
+            for (int i = 0; i < largestRectangleAround.axis1Size; i++) {
+                for (int j = 0; j < largestRectangleAround.axis2Size; j++) {
                     portalData.putBlock(
-                            foundRectangle.minCorner.offset(
+                            largestRectangleAround.minCorner.offset(
                                     axis == Direction.Axis.X ? i : 0,
                                     hasHA ? j : 0,
                                     hasHA ? axis == Direction.Axis.Z ? i : 0 : j
@@ -252,7 +252,7 @@ public abstract class EntityMixin implements IEntity {
             Map<BlockPos, ResourceKey<Level>> dimensions = portalData.getDimensions();
             for (Map.Entry<BlockPos, ResourceKey<Level>> entry : dimensions.entrySet()) {
                 BlockPos minCornerPosX = entry.getKey();
-                if (blockPos.distSqr(minCornerPosX) > 128) {
+                if (pos.distSqr(minCornerPosX) > 128) {
                     continue;
                 }
 

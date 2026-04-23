@@ -24,56 +24,56 @@ import java.util.Map;
 public abstract class BlockBehaviourMixin {
     @Inject(method = "updateShape", at = @At("TAIL"), cancellable = true)
     private void updateShapeHorizontalPortal(
-            BlockState blockState,
-            LevelReader levelReader,
-            ScheduledTickAccess scheduledTickAccess,
-            BlockPos blockPos,
-            Direction direction,
-            BlockPos blockPos2,
-            BlockState blockState2,
-            RandomSource randomSource,
+            BlockState state,
+            LevelReader level,
+            ScheduledTickAccess ticks,
+            BlockPos pos,
+            Direction directionToNeighbour,
+            BlockPos neighbourPos,
+            BlockState neighbourState,
+            RandomSource random,
             CallbackInfoReturnable<BlockState> cir
     ) {
-        if (!blockState.is(Blocks.END_PORTAL)) {
+        if (!state.is(Blocks.END_PORTAL)) {
             return;
         }
 
-        if (!(levelReader instanceof LevelAccessor levelAccessor)) {
+        if (!(level instanceof LevelAccessor levelAccessor)) {
             return;
         }
 
-        BlockUtil.FoundRectangle foundRectangle = BlockUtil.getLargestRectangleAround(
-                blockPos,
+        BlockUtil.FoundRectangle largestRectangleAround = BlockUtil.getLargestRectangleAround(
+                pos,
                 Direction.Axis.X,
                 21,
                 Direction.Axis.Z,
                 21,
-                blockPosX -> levelAccessor.getBlockState(blockPosX) == blockState
+                posX -> levelAccessor.getBlockState(posX) == state
         );
 
         boolean isComplete = true, isCustom = false;
 
-        for (int x = 0; x < foundRectangle.axis1Size; x++) {
-            for (int z = 0; z < foundRectangle.axis2Size; z++) {
-                BlockPos blockPosH = foundRectangle.minCorner.offset(x, 0, z);
+        for (int x = 0; x < largestRectangleAround.axis1Size; x++) {
+            for (int z = 0; z < largestRectangleAround.axis2Size; z++) {
+                BlockPos posH = largestRectangleAround.minCorner.offset(x, 0, z);
 
                 for (Map.Entry<BlockPos, Boolean> entry : Map.of(
-                        blockPosH.west(), x == 0,
-                        blockPosH.east(), x == foundRectangle.axis1Size - 1,
-                        blockPosH.north(), z == 0,
-                        blockPosH.south(), z == foundRectangle.axis2Size - 1
+                        posH.west(), x == 0,
+                        posH.east(), x == largestRectangleAround.axis1Size - 1,
+                        posH.north(), z == 0,
+                        posH.south(), z == largestRectangleAround.axis2Size - 1
                 ).entrySet()) {
                     if (!entry.getValue()) {
                         continue;
                     }
 
-                    BlockState blockStateX = levelAccessor.getBlockState(entry.getKey());
+                    BlockState stateX = levelAccessor.getBlockState(entry.getKey());
 
-                    if (blockStateX.isAir()) {
+                    if (stateX.isAir()) {
                         isComplete = false;
                     }
 
-                    if (blockStateX.is(Blocks.OBSIDIAN)) {
+                    if (stateX.is(Blocks.OBSIDIAN)) {
                         isCustom = true;
                     }
                 }
@@ -95,13 +95,13 @@ public abstract class BlockBehaviourMixin {
         IServerLevel serverLevelX = (IServerLevel) levelAccessor;
         PortalData portalData = serverLevelX.worldportal$getPortalData();
 
-        for (int x = 0; x < foundRectangle.axis1Size; x++) {
-            for (int z = 0; z < foundRectangle.axis2Size; z++) {
-                BlockPos blockPosX = foundRectangle.minCorner.offset(x, 0, z);
+        for (int x = 0; x < largestRectangleAround.axis1Size; x++) {
+            for (int z = 0; z < largestRectangleAround.axis2Size; z++) {
+                BlockPos posX = largestRectangleAround.minCorner.offset(x, 0, z);
 
-                levelAccessor.setBlock(blockPosX, Blocks.AIR.defaultBlockState(), 18);
+                levelAccessor.setBlock(posX, Blocks.AIR.defaultBlockState(), 18);
 
-                portalData.removeBlock(blockPosX);
+                portalData.removeBlock(posX);
             }
         }
 

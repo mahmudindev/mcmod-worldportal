@@ -28,23 +28,32 @@ public abstract class EntityLMixin implements IEntity {
             )
     )
     private Vec3 getRelativePortalPositionModify(
-            BlockUtil.FoundRectangle foundRectangle,
+            BlockUtil.FoundRectangle largestRectangleAround,
             Direction.Axis axis,
-            Vec3 vec3,
-            EntityDimensions entityDimensions,
+            Vec3 position,
+            EntityDimensions dimensions,
             Operation<Vec3> original
     ) {
-        Vec3 vec3X = original.call(foundRectangle, axis, vec3, entityDimensions);
+        Vec3 relativePortalPosition = original.call(
+                largestRectangleAround,
+                axis,
+                position,
+                dimensions
+        );
 
         if (this.worldportal$getPortalConfig() != null) {
-            BlockPos blockPos = foundRectangle.minCorner;
+            BlockPos pos = largestRectangleAround.minCorner;
 
-            BlockState blockState = this.level().getBlockState(blockPos);
-            if (!blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
-                vec3X = vec3X.subtract(0.0, vec3X.y(), 0.0);
+            BlockState state = this.level().getBlockState(pos);
+            if (!state.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
+                relativePortalPosition = relativePortalPosition.subtract(
+                        0.0,
+                        relativePortalPosition.y(),
+                        0.0
+                );
             }
         }
 
-        return vec3X;
+        return relativePortalPosition;
     }
 }

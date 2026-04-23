@@ -29,24 +29,24 @@ public abstract class NetherPortalBlockMixin {
     )
     private Optional<BlockPos> getExitPortalForcerFindPrepare(
             PortalForcer instance,
-            BlockPos blockPos,
-            boolean isNether,
+            BlockPos approximateExitPos,
+            boolean toNether,
             WorldBorder worldBorder,
             Operation<Optional<BlockPos>> original,
-            ServerLevel serverLevel,
+            ServerLevel newLevel,
             Entity entity,
-            BlockPos blockPos2
+            BlockPos portalEntryPos
     ) {
         IEntity entityX = (IEntity) entity;
 
         PortalConfig portalConfig = entityX.worldportal$getPortalConfig();
         if (portalConfig != null) {
-            ((IBlockPos) blockPos).worldportal$setLevel(entity.level());
-            ((IBlockPos) blockPos).worldportal$setPortalEntrancePos(blockPos2);
-            ((IBlockPos) blockPos).worldportal$setPortal(entityX.worldportal$getPortalId());
+            ((IBlockPos) approximateExitPos).worldportal$setLevel(entity.level());
+            ((IBlockPos) approximateExitPos).worldportal$setPortalEntrancePos(portalEntryPos);
+            ((IBlockPos) approximateExitPos).worldportal$setPortal(entityX.worldportal$getPortalId());
         }
 
-        return original.call(instance, blockPos, isNether, worldBorder);
+        return original.call(instance, approximateExitPos, toNether, worldBorder);
     }
 
     @WrapOperation(
@@ -58,22 +58,22 @@ public abstract class NetherPortalBlockMixin {
     )
     private Optional<BlockUtil.FoundRectangle> getExitPortalForcerCreatePrepare(
             PortalForcer instance,
-            BlockPos blockPos,
-            Direction.Axis axis,
+            BlockPos origin,
+            Direction.Axis portalAxis,
             Operation<Optional<BlockUtil.FoundRectangle>> original,
-            ServerLevel serverLevel,
+            ServerLevel newLevel,
             Entity entity,
-            BlockPos blockPos2
+            BlockPos portalEntryPos
     ) {
         IEntity entityX = (IEntity) entity;
 
         PortalConfig portalConfig = entityX.worldportal$getPortalConfig();
         if (portalConfig != null) {
-            ((IBlockPos) blockPos).worldportal$setLevel(entity.level());
-            ((IBlockPos) blockPos).worldportal$setPortalEntrancePos(blockPos2);
-            ((IBlockPos) blockPos).worldportal$setPortal(entityX.worldportal$getPortalId());
+            ((IBlockPos) origin).worldportal$setLevel(entity.level());
+            ((IBlockPos) origin).worldportal$setPortalEntrancePos(portalEntryPos);
+            ((IBlockPos) origin).worldportal$setPortal(entityX.worldportal$getPortalId());
         }
 
-        return original.call(instance, blockPos, axis);
+        return original.call(instance, origin, portalAxis);
     }
 }

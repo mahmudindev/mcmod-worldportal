@@ -63,16 +63,16 @@ public abstract class PortalForcerLMixin {
     private Stream<PoiRecord> findClosestPortalPositionGetInSquareInclude(
             PoiManager instance,
             Predicate<Holder<PoiType>> predicate,
-            BlockPos blockPos,
-            int i,
+            BlockPos center,
+            int radius,
             PoiManager.Occupancy occupancy,
             Operation<Stream<PoiRecord>> original
     ) {
         Stream<PoiRecord> poiRecordStream = original.call(
                 instance,
                 predicate,
-                blockPos,
-                i,
+                center,
+                radius,
                 occupancy
         );
 
@@ -86,40 +86,40 @@ public abstract class PortalForcerLMixin {
         PoiType poiType = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getValue(poiTypeResourceKey);
         Holder<PoiType> poiTypeHolder = Holder.direct(poiType);
         Stream<PoiRecord> poiRecordStreamX = ChunkPos.rangeClosed(
-                new ChunkPos(blockPos),
-                Math.floorDiv(i, 16) + 1
+                new ChunkPos(center.getX(), center.getZ()),
+                Math.floorDiv(radius, 16) + 1
         ).flatMap(chunkPos -> IntStream.range(
                 this.level.getMinSectionY(),
                 this.level.getMaxSectionY()
         ).boxed().flatMap(height -> SectionPos.of(
                 chunkPos,
                 height
-        ).blocksInside()).map(blockPosX -> {
-            ResourceKey<Block> blockResourceKeyX = portalData.getBlock(blockPosX);
+        ).blocksInside()).map(posX -> {
+            ResourceKey<Block> blockResourceKeyX = portalData.getBlock(posX);
 
             if (blockResourceKeyX == null || blockResourceKeyX == blockResourceKey) {
                 return null;
             }
 
-            ChunkAccess chunkAccess = this.level.getChunk(blockPosX);
-            BlockState blockState = chunkAccess.getBlockState(blockPosX);
+            ChunkAccess chunkAccess = this.level.getChunk(posX);
+            BlockState state = chunkAccess.getBlockState(posX);
             if (ResourceKey.create(
                     Registries.BLOCK,
-                    BuiltInRegistries.BLOCK.getKey(blockState.getBlock())
+                    BuiltInRegistries.BLOCK.getKey(state.getBlock())
             ) != blockResourceKeyX) {
-                portalData.removeBlock(blockPosX);
+                portalData.removeBlock(posX);
 
                 return null;
             }
 
-            return new PoiRecord(blockPosX, poiTypeHolder, () -> {});
+            return new PoiRecord(posX, poiTypeHolder, () -> {});
         }).filter(Objects::nonNull)).filter(poiRecord -> {
-            BlockPos blockPosX = poiRecord.getPos();
-            if (Math.abs(blockPosX.getX() - blockPos.getX()) > i) {
+            BlockPos posX = poiRecord.getPos();
+            if (Math.abs(posX.getX() - center.getX()) > radius) {
                 return false;
             }
 
-            if (Math.abs(blockPosX.getZ() - blockPos.getZ()) > i) {
+            if (Math.abs(posX.getZ() - center.getZ()) > radius) {
                 return false;
             }
 
@@ -141,77 +141,77 @@ public abstract class PortalForcerLMixin {
             Stream<BlockPos> instance,
             Predicate<? super BlockPos> predicate,
             Operation<Stream<BlockPos>> original,
-            BlockPos blockPos
+            BlockPos approximateExitPos
     ) {
-        Map<BlockPos, Boolean> blockPosPassMap = new HashMap<>();
-        PortalConfig portalConfig = ((IBlockPos) blockPos).worldportal$getPortalConfig();
-        Level level = ((IBlockPos) blockPos).worldportal$getLevel();
+        Map<BlockPos, Boolean> posPassMap = new HashMap<>();
+        PortalConfig portalConfig = ((IBlockPos) approximateExitPos).worldportal$getPortalConfig();
+        Level level = ((IBlockPos) approximateExitPos).worldportal$getLevel();
         boolean hasHA = level == null || level
-                .getBlockState(((IBlockPos) blockPos).worldportal$getPortalEntrancePos())
+                .getBlockState(((IBlockPos) approximateExitPos).worldportal$getPortalEntrancePos())
                 .hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
 
-        return original.call(instance, predicate).filter(blockPosX -> {
+        return original.call(instance, predicate).filter(posX -> {
 
-            Boolean blockPosPass = blockPosPassMap.get(blockPosX);
-            if (blockPosPass != null) {
-                return blockPosPass;
+            Boolean posPass = posPassMap.get(posX);
+            if (posPass != null) {
+                return posPass;
             }
 
             Direction.Axis AxisX = Direction.Axis.X;
             Direction.Axis AxisY = Direction.Axis.Y;
             Direction.Axis AxisZ = Direction.Axis.Z;
 
-            BlockState blockState = this.level.getBlockState(blockPosX);
-            boolean hasHAX = blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
+            BlockState state = this.level.getBlockState(posX);
+            boolean hasHAX = state.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
             Direction.Axis axis = hasHAX
-                    ? blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS)
+                    ? state.getValue(BlockStateProperties.HORIZONTAL_AXIS)
                     : AxisX;
-            BlockUtil.FoundRectangle foundRectangle = BlockUtil.getLargestRectangleAround(
-                    blockPosX,
+            BlockUtil.FoundRectangle largestRectangleAround = BlockUtil.getLargestRectangleAround(
+                    posX,
                     axis,
                     21,
                     hasHAX ? AxisY : AxisZ,
                     21,
-                    blockPosZ -> this.level.getBlockState(blockPosZ) == blockState
+                    posZ -> this.level.getBlockState(posZ) == state
             );
 
             Identifier frameC1 = BuiltInRegistries.BLOCK.getKey(
-                    this.level.getBlockState(foundRectangle.minCorner.offset(
-                            axis == AxisX ? foundRectangle.axis1Size : 0,
+                    this.level.getBlockState(largestRectangleAround.minCorner.offset(
+                            axis == AxisX ? largestRectangleAround.axis1Size : 0,
                             hasHAX ? -1 : 0,
-                            hasHAX ? axis == AxisZ ? foundRectangle.axis1Size : 0 : -1
+                            hasHAX ? axis == AxisZ ? largestRectangleAround.axis1Size : 0 : -1
                     )).getBlock()
             );
             Identifier frameC2 = BuiltInRegistries.BLOCK.getKey(
-                    this.level.getBlockState(foundRectangle.minCorner.offset(
+                    this.level.getBlockState(largestRectangleAround.minCorner.offset(
                             axis == AxisX ? -1 : 0,
                             hasHAX ? -1 : 0,
                             hasHAX && axis != AxisZ ? 0 : -1
                     )).getBlock()
             );
             Identifier frameC3 = BuiltInRegistries.BLOCK.getKey(
-                    this.level.getBlockState(foundRectangle.minCorner.offset(
-                            axis == AxisX ? foundRectangle.axis1Size : 0,
-                            hasHAX ? foundRectangle.axis2Size : 0,
+                    this.level.getBlockState(largestRectangleAround.minCorner.offset(
+                            axis == AxisX ? largestRectangleAround.axis1Size : 0,
+                            hasHAX ? largestRectangleAround.axis2Size : 0,
                             hasHAX ? axis == AxisZ
-                                    ? foundRectangle.axis1Size
-                                    : 0 : foundRectangle.axis2Size
+                                    ? largestRectangleAround.axis1Size
+                                    : 0 : largestRectangleAround.axis2Size
                     )).getBlock()
             );
             Identifier frameC4 = BuiltInRegistries.BLOCK.getKey(
-                    this.level.getBlockState(foundRectangle.minCorner.offset(
+                    this.level.getBlockState(largestRectangleAround.minCorner.offset(
                             axis == AxisX ? -1 : 0,
-                            hasHAX ? foundRectangle.axis2Size : 0,
-                            hasHAX ? axis == AxisZ ? -1 : 0 : foundRectangle.axis2Size
+                            hasHAX ? largestRectangleAround.axis2Size : 0,
+                            hasHAX ? axis == AxisZ ? -1 : 0 : largestRectangleAround.axis2Size
                     )).getBlock()
             );
 
-            boolean blockPosPassX = false;
+            boolean posPassX = false;
 
             if (portalConfig != null) {
-                blockPosPassX = hasHA == hasHAX;
+                posPassX = hasHA == hasHAX;
 
-                if (blockPosPassX) {
+                if (posPassX) {
                     for (Identifier[] v : new Identifier[][]{
                             {frameC1, portalConfig.getFrameBottomLeftLocation()},
                             {frameC2, portalConfig.getFrameBottomRightLocation()},
@@ -222,12 +222,12 @@ public abstract class PortalForcerLMixin {
                             continue;
                         }
 
-                        blockPosPassX = false;
+                        posPassX = false;
                         break;
                     }
                 }
             } else if (hasHAX) {
-                blockPosPassX = true;
+                posPassX = true;
 
                 Map<Identifier, PortalConfig> portalConfigs = PortalManager.getPortalConfigs();
                 for (Map.Entry<Identifier, PortalConfig> entry : portalConfigs.entrySet()) {
@@ -258,27 +258,27 @@ public abstract class PortalForcerLMixin {
                         continue;
                     }
 
-                    blockPosPassX = false;
+                    posPassX = false;
                     break;
                 }
             }
 
-            for (int i = 0; i < foundRectangle.axis1Size; i++) {
-                for (int j = 0; j < foundRectangle.axis2Size; j++) {
-                    blockPosPassMap.put(foundRectangle.minCorner.offset(
+            for (int i = 0; i < largestRectangleAround.axis1Size; i++) {
+                for (int j = 0; j < largestRectangleAround.axis2Size; j++) {
+                    posPassMap.put(largestRectangleAround.minCorner.offset(
                             axis == AxisX ? i : 0,
                             hasHAX ? j : 0,
                             hasHAX ? axis == AxisZ ? i : 0 : j
-                    ), blockPosPassX);
+                    ), posPassX);
                 }
             }
 
-            return blockPosPassX;
+            return posPassX;
         });
     }
 
     @WrapOperation(
-            method = "method_61028",
+            method = "lambda$findClosestPortalPosition$1",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/state/BlockState;hasProperty(Lnet/minecraft/world/level/block/state/properties/Property;)Z"
@@ -294,28 +294,28 @@ public abstract class PortalForcerLMixin {
 
     @WrapMethod(method = "createPortal")
     private Optional<BlockUtil.FoundRectangle> createPortalProcess(
-            BlockPos blockPos,
-            Direction.Axis axis,
+            BlockPos origin,
+            Direction.Axis portalAxis,
             Operation<Optional<BlockUtil.FoundRectangle>> original,
             @Share(
                     namespace = WorldPortal.MOD_ID,
                     value = "hasHA"
             ) LocalBooleanRef hasHARef
     ) {
-        Level level = ((IBlockPos) blockPos).worldportal$getLevel();
+        Level level = ((IBlockPos) origin).worldportal$getLevel();
         boolean hasHA = level == null || level
-                .getBlockState(((IBlockPos) blockPos).worldportal$getPortalEntrancePos())
+                .getBlockState(((IBlockPos) origin).worldportal$getPortalEntrancePos())
                 .hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
         hasHARef.set(hasHA);
 
-        Optional<BlockUtil.FoundRectangle> oFoundRectangle = original.call(blockPos, axis);
-        if (oFoundRectangle.isEmpty()) {
-            return oFoundRectangle;
+        Optional<BlockUtil.FoundRectangle> foundRectangle = original.call(origin, portalAxis);
+        if (foundRectangle.isEmpty()) {
+            return foundRectangle;
         }
 
-        PortalConfig portalConfig = ((IBlockPos) blockPos).worldportal$getPortalConfig();
+        PortalConfig portalConfig = ((IBlockPos) origin).worldportal$getPortalConfig();
         if (portalConfig != null) {
-            BlockUtil.FoundRectangle foundRectangle = oFoundRectangle.get();
+            BlockUtil.FoundRectangle foundRectangleX = foundRectangle.get();
 
             Direction.Axis AxisX = Direction.Axis.X;
             Direction.Axis AxisZ = Direction.Axis.Z;
@@ -323,44 +323,44 @@ public abstract class PortalForcerLMixin {
             Identifier frameC1 = portalConfig.getFrameBottomLeftLocation();
             if (frameC1 != null) {
                 Block block = BuiltInRegistries.BLOCK.getValue(frameC1);
-                this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
-                        axis == AxisX ? foundRectangle.axis1Size : 0,
+                this.level.setBlockAndUpdate(foundRectangleX.minCorner.offset(
+                        portalAxis == AxisX ? foundRectangleX.axis1Size : 0,
                         hasHA ? -1 : 0,
-                        hasHA ? axis == AxisZ ? foundRectangle.axis1Size : 0 : -1
+                        hasHA ? portalAxis == AxisZ ? foundRectangleX.axis1Size : 0 : -1
                 ), block.defaultBlockState());
             }
             Identifier frameC2 = portalConfig.getFrameBottomRightLocation();
             if (frameC2 != null) {
                 Block block = BuiltInRegistries.BLOCK.getValue(frameC2);
-                this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
-                        axis == AxisX ? -1 : 0,
+                this.level.setBlockAndUpdate(foundRectangleX.minCorner.offset(
+                        portalAxis == AxisX ? -1 : 0,
                         hasHA ? -1 : 0,
-                        hasHA && axis != AxisZ ? 0 : -1
+                        hasHA && portalAxis != AxisZ ? 0 : -1
                 ), block.defaultBlockState());
             }
             Identifier frameC3 = portalConfig.getFrameTopLeftLocation();
             if (frameC3 != null) {
                 Block block = BuiltInRegistries.BLOCK.getValue(frameC3);
-                this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
-                        axis == AxisX ? foundRectangle.axis1Size : 0,
-                        hasHA ? foundRectangle.axis2Size : 0,
-                        hasHA ? axis == AxisZ
-                                ? foundRectangle.axis1Size
-                                : 0 : foundRectangle.axis2Size
+                this.level.setBlockAndUpdate(foundRectangleX.minCorner.offset(
+                        portalAxis == AxisX ? foundRectangleX.axis1Size : 0,
+                        hasHA ? foundRectangleX.axis2Size : 0,
+                        hasHA ? portalAxis == AxisZ
+                                ? foundRectangleX.axis1Size
+                                : 0 : foundRectangleX.axis2Size
                 ), block.defaultBlockState());
             }
             Identifier frameC4 = portalConfig.getFrameTopRightLocation();
             if (frameC4 != null) {
                 Block block = BuiltInRegistries.BLOCK.getValue(frameC4);
-                this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
-                        axis == AxisX ? -1 : 0,
-                        hasHA ? foundRectangle.axis2Size : 0,
-                        hasHA ? axis == AxisZ ? -1 : 0 : foundRectangle.axis2Size
+                this.level.setBlockAndUpdate(foundRectangleX.minCorner.offset(
+                        portalAxis == AxisX ? -1 : 0,
+                        hasHA ? foundRectangleX.axis2Size : 0,
+                        hasHA ? portalAxis == AxisZ ? -1 : 0 : foundRectangleX.axis2Size
                 ), block.defaultBlockState());
             }
         }
 
-        return oFoundRectangle;
+        return foundRectangle;
     }
 
     @WrapOperation(
@@ -373,10 +373,10 @@ public abstract class PortalForcerLMixin {
     )
     private BlockPos.MutableBlockPos createPortalSupport(
             BlockPos.MutableBlockPos instance,
-            Vec3i vec3i,
-            int i,
-            int j,
-            int k,
+            Vec3i pos,
+            int x,
+            int y,
+            int z,
             Operation<BlockPos.MutableBlockPos> original,
             @Share(
                     namespace = WorldPortal.MOD_ID,
@@ -385,10 +385,10 @@ public abstract class PortalForcerLMixin {
     ) {
         return original.call(
                 instance,
-                vec3i,
-                i,
-                j,
-                hasHARef.get() ? k : k + 1
+                pos,
+                x,
+                y,
+                hasHARef.get() ? z : z + 1
         );
     }
 
@@ -402,10 +402,10 @@ public abstract class PortalForcerLMixin {
     )
     private BlockPos.MutableBlockPos createPortalFrame(
             BlockPos.MutableBlockPos instance,
-            Vec3i vec3i,
-            int i,
-            int j,
-            int k,
+            Vec3i pos,
+            int x,
+            int y,
+            int z,
             Operation<BlockPos.MutableBlockPos> original,
             @Share(
                     namespace = WorldPortal.MOD_ID,
@@ -416,10 +416,10 @@ public abstract class PortalForcerLMixin {
 
         return original.call(
                 instance,
-                vec3i,
-                i,
-                hasHA ? j : 0,
-                hasHA ? k : j
+                pos,
+                x,
+                hasHA ? y : 0,
+                hasHA ? z : y
         );
     }
 
@@ -470,10 +470,10 @@ public abstract class PortalForcerLMixin {
     )
     private BlockPos.MutableBlockPos createPortalBlock(
             BlockPos.MutableBlockPos instance,
-            Vec3i vec3i,
-            int i,
-            int j,
-            int k,
+            Vec3i pos,
+            int x,
+            int y,
+            int z,
             Operation<BlockPos.MutableBlockPos> original,
             @Share(
                     namespace = WorldPortal.MOD_ID,
@@ -484,10 +484,10 @@ public abstract class PortalForcerLMixin {
 
         return original.call(
                 instance,
-                vec3i,
-                i,
-                hasHA ? j : 0,
-                hasHA ? k : j
+                pos,
+                x,
+                hasHA ? y : 0,
+                hasHA ? z : y
         );
     }
 }

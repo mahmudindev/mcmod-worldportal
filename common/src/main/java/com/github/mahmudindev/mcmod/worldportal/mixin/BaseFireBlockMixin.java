@@ -33,11 +33,11 @@ public abstract class BaseFireBlockMixin {
             )
     )
     private void onPlaceHorizontalPortal(
-            BlockState blockState,
+            BlockState state,
             Level level,
-            BlockPos blockPos,
-            BlockState blockState2,
-            boolean bl,
+            BlockPos pos,
+            BlockState oldState,
+            boolean movedByPiston,
             CallbackInfo ci
     ) {
         boolean inPortalDimension = false;
@@ -60,41 +60,41 @@ public abstract class BaseFireBlockMixin {
             }
         }
 
-        Function<BlockState, Boolean> isEmpty = (blockStateX) -> {
-            if (blockStateX.isAir() || blockStateX.is(BlockTags.FIRE)) {
+        Function<BlockState, Boolean> isEmpty = (stateX) -> {
+            if (stateX.isAir() || stateX.is(BlockTags.FIRE)) {
                 return true;
             }
 
-            return blockStateX.is(Blocks.END_PORTAL);
+            return stateX.is(Blocks.END_PORTAL);
         };
 
-        if (!inPortalDimension || !isEmpty.apply(blockState)) {
+        if (!inPortalDimension || !isEmpty.apply(state)) {
             return;
         }
 
-        BlockPos blockPosX = blockPos;
+        BlockPos posX = pos;
         while (true) {
-            if (Math.abs(blockPos.getX() - blockPosX.getX()) > 21) {
+            if (Math.abs(pos.getX() - posX.getX()) > 21) {
                 return;
             }
 
-            if (Math.abs(blockPos.getZ() - blockPosX.getZ()) > 21) {
+            if (Math.abs(pos.getZ() - posX.getZ()) > 21) {
                 return;
             }
 
-            BlockPos blockPosH = blockPosX.north();
+            BlockPos posH = posX.north();
 
-            BlockState blockStateN = level.getBlockState(blockPosH);
-            if (!isEmpty.apply(blockStateN)) {
-                if (!blockStateN.is(Blocks.OBSIDIAN)) {
+            BlockState stateN = level.getBlockState(posH);
+            if (!isEmpty.apply(stateN)) {
+                if (!stateN.is(Blocks.OBSIDIAN)) {
                     return;
                 }
 
-                blockPosH = blockPosX.west();
+                posH = posX.west();
 
-                BlockState blockStateW = level.getBlockState(blockPosH);
-                if (!isEmpty.apply(blockStateW)) {
-                    if (!blockStateW.is(Blocks.OBSIDIAN)) {
+                BlockState stateW = level.getBlockState(posH);
+                if (!isEmpty.apply(stateW)) {
+                    if (!stateW.is(Blocks.OBSIDIAN)) {
                         return;
                     }
 
@@ -102,23 +102,23 @@ public abstract class BaseFireBlockMixin {
                 }
             }
 
-            blockPosX = blockPosH;
+            posX = posH;
         }
 
         int distanceS = 1;
         for (int i = 1; i <= 21; i++) {
-            BlockPos blockPosS = blockPosX.south(i);
+            BlockPos posS = posX.south(i);
 
-            BlockState blockStateS = level.getBlockState(blockPosS);
-            if (!isEmpty.apply(blockStateS)) {
-                if (!blockStateS.is(Blocks.OBSIDIAN)) {
+            BlockState stateS = level.getBlockState(posS);
+            if (!isEmpty.apply(stateS)) {
+                if (!stateS.is(Blocks.OBSIDIAN)) {
                     return;
                 }
 
                 break;
             }
 
-            if (!level.getBlockState(blockPosS.west()).is(Blocks.OBSIDIAN)) {
+            if (!level.getBlockState(posS.west()).is(Blocks.OBSIDIAN)) {
                 return;
             }
 
@@ -127,18 +127,18 @@ public abstract class BaseFireBlockMixin {
 
         int distanceE = 1;
         for (int i = 1; i <= 21; i++) {
-            BlockPos blockPosE = blockPosX.east(i);
+            BlockPos posE = posX.east(i);
 
-            BlockState blockStateE = level.getBlockState(blockPosE);
-            if (!isEmpty.apply(blockStateE)) {
-                if (!blockStateE.is(Blocks.OBSIDIAN)) {
+            BlockState stateE = level.getBlockState(posE);
+            if (!isEmpty.apply(stateE)) {
+                if (!stateE.is(Blocks.OBSIDIAN)) {
                     return;
                 }
 
                 break;
             }
 
-            if (!level.getBlockState(blockPosE.north()).is(Blocks.OBSIDIAN)) {
+            if (!level.getBlockState(posE.north()).is(Blocks.OBSIDIAN)) {
                 return;
             }
 
@@ -151,21 +151,21 @@ public abstract class BaseFireBlockMixin {
 
         for (int x = 1; x < distanceE; x++) {
             for (int z = 1; z < distanceS; z++) {
-                BlockPos blockPosH = blockPosX.offset(x, 0, z);
+                BlockPos posH = posX.offset(x, 0, z);
 
                 if (x == distanceE - 1) {
-                    if (!level.getBlockState(blockPosH.east()).is(Blocks.OBSIDIAN)) {
+                    if (!level.getBlockState(posH.east()).is(Blocks.OBSIDIAN)) {
                         return;
                     }
                 }
 
                 if (z == distanceS - 1) {
-                    if (!level.getBlockState(blockPosH.south()).is(Blocks.OBSIDIAN)) {
+                    if (!level.getBlockState(posH.south()).is(Blocks.OBSIDIAN)) {
                         return;
                     }
                 }
 
-                if (!isEmpty.apply(level.getBlockState(blockPosH))) {
+                if (!isEmpty.apply(level.getBlockState(posH))) {
                     return;
                 }
             }
@@ -181,11 +181,11 @@ public abstract class BaseFireBlockMixin {
 
         for (int x = 0; x < distanceE; x++) {
             for (int z = 0; z < distanceS; z++) {
-                BlockPos blockPosZ = blockPosX.offset(x, 0, z);
+                BlockPos posZ = posX.offset(x, 0, z);
 
-                level.setBlock(blockPosZ, block.defaultBlockState(), 18);
+                level.setBlock(posZ, block.defaultBlockState(), 18);
 
-                portalData.putBlock(blockPosZ, resourceKey);
+                portalData.putBlock(posZ, resourceKey);
             }
         }
     }

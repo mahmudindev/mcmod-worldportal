@@ -32,15 +32,15 @@ public abstract class NetherPortalBlockLMixin {
     )
     private ServerLevel getPortalDestinationPrepare(
             MinecraftServer instance,
-            ResourceKey<Level> resourceKey,
+            ResourceKey<Level> dimension,
             Operation<ServerLevel> original,
-            ServerLevel serverLevel,
+            ServerLevel currentLevel,
             Entity entity,
-            BlockPos blockPos
+            BlockPos portalEntryPos
     ) {
         return original.call(instance, ((IEntity) entity).worldportal$setupPortal(
-                blockPos,
-                resourceKey
+                portalEntryPos,
+                dimension
         ));
     }
 
@@ -69,25 +69,25 @@ public abstract class NetherPortalBlockLMixin {
             )
     )
     private BlockUtil.FoundRectangle getExitPortalPrepare(
-            BlockPos blockPos,
-            Direction.Axis axis,
+            BlockPos center,
+            Direction.Axis axis1,
             int i,
             Direction.Axis axis2,
             int j,
-            Predicate<BlockPos> predicate,
+            Predicate<BlockPos> test,
             Operation<BlockUtil.FoundRectangle> original,
-            ServerLevel serverLevel
+            ServerLevel newLevel
     ) {
-        BlockState blockState = serverLevel.getBlockState(blockPos);
+        BlockState blockState = newLevel.getBlockState(center);
         boolean hasHA = blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
 
         return original.call(
-                blockPos,
-                axis,
+                center,
+                axis1,
                 i,
                 hasHA ? axis2 : Direction.Axis.Z,
                 j,
-                predicate
+                test
         );
     }
 
@@ -99,30 +99,30 @@ public abstract class NetherPortalBlockLMixin {
             )
     )
     private static Vec3 getDimensionTransitionFromExitHorizontalPortal(
-            double d,
-            double e,
-            double f,
+            double x,
+            double y,
+            double z,
             Operation<Vec3> original,
             Entity entity,
-            BlockPos blockPos
+            BlockPos portalEntryPos
     ) {
         if (((IEntity) entity).worldportal$getPortalConfig() != null) {
             Level level = entity.level();
-            BlockState blockState = level.getBlockState(blockPos);
+            BlockState state = level.getBlockState(portalEntryPos);
 
             return entity.getRelativePortalPosition(
                     Direction.Axis.X,
                     BlockUtil.getLargestRectangleAround(
-                            blockPos,
+                            portalEntryPos,
                             Direction.Axis.X,
                             21,
                             Direction.Axis.Z,
                             21,
-                            blockPosX -> level.getBlockState(blockPosX) == blockState
+                            posX -> level.getBlockState(posX) == state
                     )
             );
         }
 
-        return original.call(d, e, f);
+        return original.call(x, y, z);
     }
 }

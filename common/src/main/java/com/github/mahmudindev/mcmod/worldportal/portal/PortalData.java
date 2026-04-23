@@ -22,27 +22,27 @@ public class PortalData extends SavedData {
         return instance.group(
                 PortalBlock.CODEC.listOf().fieldOf("Blocks").forGetter(v -> {
                     List<PortalBlock> portalBlocks = new ArrayList<>();
-                    v.blocks.forEach((blockPos, resourceKey) -> {
-                        portalBlocks.add(new PortalBlock(blockPos, resourceKey));
+                    v.blocks.forEach((pos, resourceKey) -> {
+                        portalBlocks.add(new PortalBlock(pos, resourceKey));
                     });
                     return portalBlocks;
                 }),
                 PortalDimension.CODEC.listOf().fieldOf("Dimensions").forGetter(v -> {
                     List<PortalDimension> portalDimensions = new ArrayList<>();
-                    v.dimensions.forEach((blockPos, resourceKey) -> {
-                        portalDimensions.add(new PortalDimension(blockPos, resourceKey));
+                    v.dimensions.forEach((pos, resourceKey) -> {
+                        portalDimensions.add(new PortalDimension(pos, resourceKey));
                     });
                     return portalDimensions;
                 })
         ).apply(instance, (portalBlocks, portalDimensions) -> {
             Map<BlockPos, ResourceKey<Block>> blocks = new HashMap<>();
             portalBlocks.forEach(portalBlock -> blocks.put(
-                    portalBlock.blockPos,
+                    portalBlock.pos,
                     portalBlock.resourceKey
             ));
             Map<BlockPos, ResourceKey<Level>> dimensions = new HashMap<>();
             portalDimensions.forEach(portalBlock -> dimensions.put(
-                    portalBlock.blockPos,
+                    portalBlock.pos,
                     portalBlock.resourceKey
             ));
             return new PortalData(blocks, dimensions);
@@ -50,7 +50,7 @@ public class PortalData extends SavedData {
     });
 
     public static SavedDataType<PortalData> TYPE = new SavedDataType<>(
-            WorldPortal.MOD_ID + "_data",
+            Identifier.fromNamespaceAndPath(WorldPortal.MOD_ID, "portals"),
             PortalData::new,
             CODEC,
             null
@@ -109,12 +109,12 @@ public class PortalData extends SavedData {
         this.setDirty();
     }
 
-    record PortalBlock(BlockPos blockPos, ResourceKey<Block> resourceKey) {
+    record PortalBlock(BlockPos pos, ResourceKey<Block> resourceKey) {
         static final Codec<PortalBlock> CODEC = RecordCodecBuilder.create(instance -> {
             return instance.group(
-                    Codec.INT.fieldOf("PosX").forGetter(v -> v.blockPos.getX()),
-                    Codec.INT.fieldOf("PosY").forGetter(v -> v.blockPos.getY()),
-                    Codec.INT.fieldOf("PosZ").forGetter(v -> v.blockPos.getZ()),
+                    Codec.INT.fieldOf("PosX").forGetter(v -> v.pos.getX()),
+                    Codec.INT.fieldOf("PosY").forGetter(v -> v.pos.getY()),
+                    Codec.INT.fieldOf("PosZ").forGetter(v -> v.pos.getZ()),
                     Identifier.CODEC.fieldOf("Block").forGetter(v -> {
                         return v.resourceKey.identifier();
                     })
@@ -125,12 +125,12 @@ public class PortalData extends SavedData {
         });
     }
 
-    record PortalDimension(BlockPos blockPos, ResourceKey<Level> resourceKey) {
+    record PortalDimension(BlockPos pos, ResourceKey<Level> resourceKey) {
         static final Codec<PortalData.PortalDimension> CODEC = RecordCodecBuilder.create(instance -> {
             return instance.group(
-                    Codec.INT.fieldOf("PosX").forGetter(v -> v.blockPos.getX()),
-                    Codec.INT.fieldOf("PosY").forGetter(v -> v.blockPos.getY()),
-                    Codec.INT.fieldOf("PosZ").forGetter(v -> v.blockPos.getZ()),
+                    Codec.INT.fieldOf("PosX").forGetter(v -> v.pos.getX()),
+                    Codec.INT.fieldOf("PosY").forGetter(v -> v.pos.getY()),
+                    Codec.INT.fieldOf("PosZ").forGetter(v -> v.pos.getZ()),
                     Identifier.CODEC.fieldOf("Dimension").forGetter(v -> {
                         return v.resourceKey.identifier();
                     })
