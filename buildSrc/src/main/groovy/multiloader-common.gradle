@@ -66,7 +66,6 @@ processResources {
             'mod_license'                   : mod_license,
             'java_version'                  : java_version,
             'minecraft_version'             : minecraft_version,
-            'minecraft_version_range'       : minecraft_version_range,
             'fabric_api_version'            : fabric_api_version,
             'fabric_loader_version'         : fabric_loader_version,
             'neoforge_version'              : neoforge_version,
