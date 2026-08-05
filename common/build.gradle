@@ -10,4 +10,10 @@ dependencies {
 
     annotationProcessor("io.github.llamalad7:mixinextras-common:$rootProject.mixinextras_version")
     compileOnly("io.github.llamalad7:mixinextras-common:$rootProject.mixinextras_version")
+
+    modImplementation(
+            group: "com.github.mahmudindev.mcmod.orenocommons",
+            name: "orenocommons-common",
+            version: rootProject.orenocommons_version
+    )
 }

@@ -36,6 +36,12 @@ dependencies {
     annotationProcessor("io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version")
     implementation("io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version")
     include("io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version")
+
+    include(
+            group: "com.github.mahmudindev.mcmod.orenocommons",
+            name: "orenocommons-fabric",
+            version: rootProject.orenocommons_version
+    )
 }
 
 processResources {
