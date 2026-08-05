@@ -32,6 +32,12 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+
+    include(
+            group: "com.github.mahmudindev.mcmod.orenocommons",
+            name: "orenocommons-fabric",
+            version: rootProject.orenocommons_version
+    )
 }
 
 processResources {
