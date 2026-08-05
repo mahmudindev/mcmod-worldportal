@@ -54,6 +54,11 @@ dependencies {
             name: "orenocommons-forge",
             version: rootProject.orenocommons_version
     )
+    include(
+            group: "com.github.mahmudindev.mcmod.orenoevents",
+            name: "orenoevents-forge",
+            version: rootProject.orenoevents_version
+    )
 }
 
 processResources {
