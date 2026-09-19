@@ -47,6 +47,11 @@ dependencies {
             name: "orenoevents-fabric",
             version: rootProject.orenoevents_version
     )
+    include(
+            group: "com.github.mahmudindev.mcmod.orenoconfig",
+            name: "orenoconfig-fabric",
+            version: rootProject.orenoconfig_version
+    )
 }
 
 processResources {
