@@ -1,9 +1,9 @@
 package com.github.mahmudindev.mcmod.worldportal;
 
+import com.github.mahmudindev.mcmod.orenoevents.event.events.ServerEvents;
 import com.github.mahmudindev.mcmod.worldportal.config.Config;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.mojang.logging.LogUtils;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.slf4j.Logger;
 
 public final class WorldPortal {
@@ -12,9 +12,9 @@ public final class WorldPortal {
 
     public static void init() {
         Config.load();
-    }
 
-    public static void onResourceManagerReload(ResourceManager resourceManager) {
-        PortalManager.onResourceManagerReload(resourceManager);
+        ServerEvents.RESOURCE_MANAGER_RELOAD.register(resourceManager -> {
+            PortalManager.onServerResourceManagerReload(resourceManager);
+        });
     }
 }
