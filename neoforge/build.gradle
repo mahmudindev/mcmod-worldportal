@@ -14,6 +14,11 @@ dependencies {
             name: "orenoevents-neoforge",
             version: rootProject.orenoevents_version
     ))
+    jarJar(implementation(
+            group: "com.github.mahmudindev.mcmod.orenoconfig",
+            name: "orenoconfig-neoforge",
+            version: rootProject.orenoconfig_version
+    ))
 }
 
 neoForge {
