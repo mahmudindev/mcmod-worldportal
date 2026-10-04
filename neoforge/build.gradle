@@ -4,6 +4,11 @@ plugins {
 }
 
 dependencies {
+    jarJar(implementation(
+            group: "com.github.mahmudindev.mcmod.orenocommons",
+            name: "orenocommons-neoforge",
+            version: rootProject.orenocommons_version
+    ))
 }
 
 neoForge {

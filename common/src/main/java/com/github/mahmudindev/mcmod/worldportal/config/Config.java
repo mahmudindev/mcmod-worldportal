@@ -1,5 +1,6 @@
 package com.github.mahmudindev.mcmod.worldportal.config;
 
+import com.github.mahmudindev.mcmod.orenocommons.platform.UnifiedPlatform;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import com.google.gson.Gson;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Config {
-    private static final Path CONFIG_DIR = WorldPortal.PLATFORM.getConfigDirectory();
+    private static final Path CONFIG_DIR = UnifiedPlatform.getConfigDir();
     private static Config CONFIG = new Config();
 
     private final Map<String, PortalConfig> portals = new HashMap<>();

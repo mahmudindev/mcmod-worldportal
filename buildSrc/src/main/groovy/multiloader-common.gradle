@@ -29,6 +29,10 @@ repositories {
             includeGroupAndSubgroups('org.spongepowered')
         }
     }
+
+    maven {
+        url = 'https://raw.githubusercontent.com/mahmudindev/mvnrepository/refs/heads/master'
+    }
 }
 
 sourcesJar {

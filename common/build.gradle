@@ -20,6 +20,12 @@ dependencies {
             name: 'mixinextras-common',
             version: '0.5.4'
     ))
+
+    implementation(
+            group: "com.github.mahmudindev.mcmod.orenocommons",
+            name: "orenocommons-common",
+            version: rootProject.orenocommons_version
+    )
 }
 
 configurations {
