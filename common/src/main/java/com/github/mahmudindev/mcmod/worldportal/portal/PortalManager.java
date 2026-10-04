@@ -14,7 +14,7 @@ import java.util.Map;
 public class PortalManager {
     private static final Map<Identifier, PortalConfig> PORTAL_CONFIGS = new HashMap<>();
 
-    public static void onResourceManagerReload(ResourceManager manager) {
+    public static void onServerResourceManagerReload(ResourceManager manager) {
         PORTAL_CONFIGS.clear();
 
         Config config = Config.getConfig();

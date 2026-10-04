@@ -2,11 +2,6 @@ package com.github.mahmudindev.mcmod.worldportal.fabric;
 
 import com.github.mahmudindev.mcmod.worldportal.WorldPortal;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 public final class WorldPortalFabric implements ModInitializer {
     @Override
@@ -17,17 +12,5 @@ public final class WorldPortalFabric implements ModInitializer {
 
         // Run our common setup.
         WorldPortal.init();
-
-        ResourceLoader
-                .get(PackType.SERVER_DATA)
-                .registerReloadListener(Identifier.fromNamespaceAndPath(
-                        WorldPortal.MOD_ID,
-                        "default"
-                ), new ResourceManagerReloadListener() {
-                    @Override
-                    public void onResourceManagerReload(ResourceManager resourceManager) {
-                        WorldPortal.onResourceManagerReload(resourceManager);
-                    }
-                });
     }
 }
