@@ -31,6 +31,11 @@ dependencies {
             name: "orenoevents-common",
             version: rootProject.orenoevents_version
     )
+    implementation(
+            group: "com.github.mahmudindev.mcmod.orenoconfig",
+            name: "orenoconfig-common",
+            version: rootProject.orenoconfig_version
+    )
 }
 
 configurations {
