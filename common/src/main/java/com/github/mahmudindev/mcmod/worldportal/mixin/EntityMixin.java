@@ -42,24 +42,26 @@ public abstract class EntityMixin implements IEntity {
             method = "handlePortal",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;teleport(Lnet/minecraft/world/level/portal/TeleportTransition;)Lnet/minecraft/world/entity/Entity;"
+                    target = "Lnet/minecraft/world/entity/Entity;teleportToPortalDestination(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/portal/TeleportTransition;)V"
             )
     )
-    private Entity handlePortalChangeDimensionFinish(
+    private void handlePortalChangeDimensionFinish(
             Entity instance,
-            TeleportTransition transition,
-            Operation<Entity> original
+            ServerLevel level,
+            TeleportTransition teleportTransition,
+            Operation<Void> original
     ) {
         PortalConfig portalConfig = this.worldportal$getPortalConfig();
         if (portalConfig != null) {
-            ServerLevel serverLevel = transition.newLevel();
+            ServerLevel serverLevel = teleportTransition.newLevel();
 
             ResourceKey<Level> dimension = serverLevel.dimension();
             if (dimension != portalConfig.getDestinationKey()) {
-                return original.call(instance, transition);
+                original.call(instance, level, teleportTransition);
+                return;
             }
 
-            BlockPos pos = BlockPos.containing(transition.position());
+            BlockPos pos = BlockPos.containing(teleportTransition.position());
 
             BlockState state = serverLevel.getBlockState(pos);
             boolean hasHA = state.hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
@@ -95,10 +97,10 @@ public abstract class EntityMixin implements IEntity {
                 }
             }
 
-            portalData.putDimension(largestRectangleAround.minCorner, this.level().dimension());
+            portalData.putDimension(largestRectangleAround.minCorner, level.dimension());
         }
 
-        return original.call(instance, transition);
+        original.call(instance, level, teleportTransition);
     }
 
     @Inject(method = "handlePortal", at = @At(value = "RETURN"))
