@@ -42,11 +42,11 @@ dependencies {
     implementation("io.github.llamalad7:mixinextras-forge:$rootProject.mixinextras_version")
     include("io.github.llamalad7:mixinextras-forge:$rootProject.mixinextras_version")
 
-    include(
+    modImplementation(include(
             group: "com.github.mahmudindev.mcmod.orenocommons",
             name: "orenocommons-forge",
             version: rootProject.orenocommons_version
-    )
+    ))
     include(
             group: "com.github.mahmudindev.mcmod.orenoevents",
             name: "orenoevents-forge",
