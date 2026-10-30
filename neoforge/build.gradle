@@ -52,6 +52,12 @@ dependencies {
             name: "orenoconfig-neoforge",
             version: rootProject.orenoconfig_version
     )
+
+    include(
+            group: "com.github.bawnorton.mixinsquared",
+            name: "mixinsquared-fabric",
+            version: rootProject.mixinsquared_version
+    )
 }
 
 processResources {

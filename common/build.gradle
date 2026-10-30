@@ -23,4 +23,16 @@ dependencies {
             name: "orenoconfig-common",
             version: rootProject.orenoconfig_version
     )
+
+    annotationProcessor(compileOnly(
+            group: "com.github.bawnorton.mixinsquared",
+            name: "mixinsquared-common",
+            version: rootProject.mixinsquared_version
+    ))
+    compileOnly(
+            group: "dev.ryanhcode.sable",
+            name: "sable-common-${rootProject.minecraft_version}",
+            version: rootProject.sable_version,
+            transitive: false
+    )
 }

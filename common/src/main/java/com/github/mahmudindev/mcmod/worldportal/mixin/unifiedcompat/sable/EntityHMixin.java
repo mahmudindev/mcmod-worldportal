@@ -1,5 +1,6 @@
-package com.github.mahmudindev.mcmod.worldportal.mixin;
+package com.github.mahmudindev.mcmod.worldportal.mixin.unifiedcompat.sable;
 
+import com.bawnorton.mixinsquared.TargetHandler;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -16,10 +17,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(value = Entity.class, priority = 750)
-public abstract class EntityLMixin implements IEntity {
+@Mixin(value = Entity.class, priority = 1250)
+public abstract class EntityHMixin implements IEntity {
     @Shadow public abstract Level level();
 
+    @TargetHandler(
+            mixin = "dev.ryanhcode.sable.mixin.portal.EntityMixin",
+            name = "getRelativePortalPosition"
+    )
     @WrapOperation(
             method = "getRelativePortalPosition",
             at = @At(

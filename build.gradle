@@ -31,6 +31,21 @@ subprojects {
         // for more information about repositories.
 
         maven { url 'https://raw.githubusercontent.com/mahmudindev/mvnrepository/refs/heads/master' }
+
+        maven { url 'https://maven.bawnorton.com/releases' }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "RyanHCode Maven"
+                    url = "https://maven.ryanhcode.dev/releases"
+                }
+            }
+
+            filter {
+                includeGroup("dev.ryanhcode.sable")
+                includeGroup("dev.ryanhcode.sable-companion")
+            }
+        }
     }
 
     loom {

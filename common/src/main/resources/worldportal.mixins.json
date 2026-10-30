@@ -11,12 +11,13 @@
     "BlockBehaviourMixin",
     "BlockPosMixin",
     "EndPortalBlockMixin",
-    "EntityLMixin",
     "EntityMixin",
     "NetherPortalBlockLMixin",
     "NetherPortalBlockMixin",
     "PortalForcerLMixin",
-    "ServerLevelMixin"
+    "ServerLevelMixin",
+    "unifiedcompat.nor.sable.EntityLMixin",
+    "unifiedcompat.sable.EntityHMixin"
   ],
   "injectors": {
     "defaultRequire": 1
