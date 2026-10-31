@@ -191,23 +191,23 @@ public abstract class EntityMixin implements IEntity {
                 }
             }
 
-            Identifier c1 = v.getFrameBottomLeftLocation();
-            if (c1 != null && !frameC1.equals(c1)) {
+            Identifier frameC1Target = v.getFrameC1(axis);
+            if (frameC1Target != null && !frameC1.equals(frameC1Target)) {
                 return;
             }
 
-            Identifier c2 = v.getFrameBottomRightLocation();
-            if (c2 != null && !frameC2.equals(c2)) {
+            Identifier frameC2Target = v.getFrameC2(axis);
+            if (frameC2Target != null && !frameC2.equals(frameC2Target)) {
                 return;
             }
 
-            Identifier c3 = v.getFrameTopLeftLocation();
-            if (c3 != null && !frameC3.equals(c3)) {
+            Identifier frameC3Target = v.getFrameC3(axis);
+            if (frameC3Target != null && !frameC3.equals(frameC3Target)) {
                 return;
             }
 
-            Identifier c4 = v.getFrameTopRightLocation();
-            if (c4 != null && !frameC4.equals(c4)) {
+            Identifier frameC4Target = v.getFrameC4(axis);
+            if (frameC4Target != null && !frameC4.equals(frameC4Target)) {
                 return;
             }
 
