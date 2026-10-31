@@ -210,10 +210,10 @@ public abstract class PortalForcerLMixin {
 
                 if (blockPosPassX) {
                     for (ResourceLocation[] v : new ResourceLocation[][]{
-                            {frameC1, portalConfig.getFrameBottomLeftLocation()},
-                            {frameC2, portalConfig.getFrameBottomRightLocation()},
-                            {frameC3, portalConfig.getFrameTopLeftLocation()},
-                            {frameC4, portalConfig.getFrameTopRightLocation()}
+                            {frameC1, portalConfig.getFrameC1(axis)},
+                            {frameC2, portalConfig.getFrameC2(axis)},
+                            {frameC3, portalConfig.getFrameC3(axis)},
+                            {frameC4, portalConfig.getFrameC4(axis)}
                     }) {
                         if (v[1] != null && v[0].equals(v[1])) {
                             continue;
@@ -235,23 +235,23 @@ public abstract class PortalForcerLMixin {
                         continue;
                     }
 
-                    ResourceLocation c1 = portalConfigX.getFrameBottomLeftLocation();
-                    if (c1 != null && !c1.equals(frameC1)) {
+                    ResourceLocation frameC1Target = portalConfigX.getFrameC1(axis);
+                    if (frameC1Target != null && !frameC1.equals(frameC1Target)) {
                         continue;
                     }
 
-                    ResourceLocation c2 = portalConfigX.getFrameBottomRightLocation();
-                    if (c2 != null && !c2.equals(frameC2)) {
+                    ResourceLocation frameC2Target = portalConfigX.getFrameC2(axis);
+                    if (frameC2Target != null && !frameC2.equals(frameC2Target)) {
                         continue;
                     }
 
-                    ResourceLocation c3 = portalConfigX.getFrameTopLeftLocation();
-                    if (c3 != null && !c3.equals(frameC3)) {
+                    ResourceLocation frameC3Target = portalConfigX.getFrameC3(axis);
+                    if (frameC3Target != null && !frameC3.equals(frameC3Target)) {
                         continue;
                     }
 
-                    ResourceLocation c4 = portalConfigX.getFrameTopRightLocation();
-                    if (c4 != null && !c4.equals(frameC4)) {
+                    ResourceLocation frameC4Target = portalConfigX.getFrameC4(axis);
+                    if (frameC4Target != null && !frameC4.equals(frameC4Target)) {
                         continue;
                     }
 
@@ -363,7 +363,7 @@ public abstract class PortalForcerLMixin {
             Direction.Axis AxisX = Direction.Axis.X;
             Direction.Axis AxisZ = Direction.Axis.Z;
 
-            ResourceLocation frameC1 = portalConfig.getFrameBottomLeftLocation();
+            ResourceLocation frameC1 = portalConfig.getFrameC1(axis);
             if (frameC1 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC1);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
@@ -372,7 +372,7 @@ public abstract class PortalForcerLMixin {
                         hasHA ? axis == AxisZ ? foundRectangle.axis1Size : 0 : -1
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC2 = portalConfig.getFrameBottomRightLocation();
+            ResourceLocation frameC2 = portalConfig.getFrameC2(axis);
             if (frameC2 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC2);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
@@ -381,7 +381,7 @@ public abstract class PortalForcerLMixin {
                         hasHA && axis != AxisZ ? 0 : -1
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC3 = portalConfig.getFrameTopLeftLocation();
+            ResourceLocation frameC3 = portalConfig.getFrameC3(axis);
             if (frameC3 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC3);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
@@ -392,7 +392,7 @@ public abstract class PortalForcerLMixin {
                                 : 0 : foundRectangle.axis2Size
                 ), block.defaultBlockState());
             }
-            ResourceLocation frameC4 = portalConfig.getFrameTopRightLocation();
+            ResourceLocation frameC4 = portalConfig.getFrameC4(axis);
             if (frameC4 != null) {
                 Block block = BuiltInRegistries.BLOCK.get(frameC4);
                 this.level.setBlockAndUpdate(foundRectangle.minCorner.offset(
