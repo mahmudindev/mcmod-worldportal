@@ -61,7 +61,11 @@ public class Config {
 
         ModCommonConfig config = new ModCommonConfig(WorldPortal.MOD_ID, "worldportal");
         config.registerPojo("", CONFIG);
-        config.load();
+        try {
+            config.load();
+        } catch (Exception e) {
+            WorldPortal.LOGGER.error("Failed to load config", e);
+        }
     }
 
     public static Config getConfig() {
