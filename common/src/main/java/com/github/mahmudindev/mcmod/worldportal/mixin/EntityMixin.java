@@ -46,7 +46,7 @@ public abstract class EntityMixin implements IEntity {
             )
     )
     private void handleNetherPortalChangeDimensionAfter(CallbackInfo ci) {
-        this.portalId = null;
+        this.worldportal$clear();
     }
 
     @ModifyArg(
@@ -81,6 +81,11 @@ public abstract class EntityMixin implements IEntity {
     @Override
     public void worldportal$setPortal(ResourceLocation portalId) {
         this.portalId = portalId;
+    }
+
+    @Override
+    public void worldportal$clear() {
+        this.portalId = null;
     }
 
     @Override
