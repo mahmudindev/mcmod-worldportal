@@ -150,6 +150,8 @@ public abstract class PortalForcerLMixin {
                 .getBlockState(((IBlockPos) approximateExitPos).worldportal$getPortalEntrancePos())
                 .hasProperty(BlockStateProperties.HORIZONTAL_AXIS);
 
+        ((IBlockPos) approximateExitPos).worldportal$clear();
+
         return original.call(instance, predicate).filter(posX -> {
 
             Boolean posPass = posPassMap.get(posX);
@@ -310,6 +312,8 @@ public abstract class PortalForcerLMixin {
 
         Optional<BlockUtil.FoundRectangle> foundRectangle = original.call(origin, portalAxis);
         if (foundRectangle.isEmpty()) {
+            ((IBlockPos) origin).worldportal$clear();
+
             return foundRectangle;
         }
 
@@ -359,6 +363,8 @@ public abstract class PortalForcerLMixin {
                 ), block.defaultBlockState());
             }
         }
+
+        ((IBlockPos) origin).worldportal$clear();
 
         return foundRectangle;
     }

@@ -13,6 +13,8 @@ public interface IEntity {
 
     void worldportal$setPortal(Identifier portalId);
 
+    void worldportal$clear();
+
     ResourceKey<Level> worldportal$setupPortal(
             BlockPos pos,
             ResourceKey<Level> originalKey
