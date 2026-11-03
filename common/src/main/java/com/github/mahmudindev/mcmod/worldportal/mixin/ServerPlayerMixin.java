@@ -3,20 +3,14 @@ package com.github.mahmudindev.mcmod.worldportal.mixin;
 import com.github.mahmudindev.mcmod.worldportal.base.IBlockPos;
 import com.github.mahmudindev.mcmod.worldportal.base.IEntity;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.portal.PortalForcer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-
-import java.util.Optional;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player implements IEntity {
@@ -29,19 +23,15 @@ public abstract class ServerPlayerMixin extends Player implements IEntity {
         super(level, blockPos, f, gameProfile);
     }
 
-    @WrapOperation(
+    @ModifyArg(
             method = "getExitPortal",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/portal/PortalForcer;createPortal(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction$Axis;)Ljava/util/Optional;"
-            )
+            ),
+            index = 0
     )
-    private Optional<BlockUtil.FoundRectangle> getExitPortalForcerCreatePrepare(
-            PortalForcer instance,
-            BlockPos blockPos,
-            Direction.Axis axis,
-            Operation<Optional<BlockUtil.FoundRectangle>> original
-    ) {
+    private BlockPos getExitPortalForcerCreatePrepare(BlockPos blockPos) {
         PortalConfig portalConfig = this.worldportal$getPortalConfig();
         if (portalConfig != null) {
             ((IBlockPos) blockPos).worldportal$setLevel(this.level());
@@ -49,6 +39,6 @@ public abstract class ServerPlayerMixin extends Player implements IEntity {
             ((IBlockPos) blockPos).worldportal$setPortal(this.worldportal$getPortalId());
         }
 
-        return original.call(instance, blockPos, axis);
+        return blockPos;
     }
 }

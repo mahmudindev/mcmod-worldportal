@@ -6,8 +6,6 @@ import com.github.mahmudindev.mcmod.worldportal.base.IServerLevel;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalData;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,18 +18,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.portal.PortalForcer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements IEntity {
@@ -53,20 +49,15 @@ public abstract class EntityMixin implements IEntity {
         this.portalId = null;
     }
 
-    @WrapOperation(
+    @ModifyArg(
             method = "getExitPortal",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/portal/PortalForcer;findPortalAround(Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/level/border/WorldBorder;)Ljava/util/Optional;"
-            )
+            ),
+            index = 0
     )
-    private Optional<BlockUtil.FoundRectangle> getExitPortalForcerFindPrepare(
-            PortalForcer instance,
-            BlockPos blockPos,
-            boolean isNether,
-            WorldBorder worldBorder,
-            Operation<Optional<BlockUtil.FoundRectangle>> original
-    ) {
+    private BlockPos getExitPortalForcerFindPrepare(BlockPos blockPos) {
         PortalConfig portalConfig = this.worldportal$getPortalConfig();
         if (portalConfig != null) {
             ((IBlockPos) blockPos).worldportal$setLevel(this.level());
@@ -74,7 +65,7 @@ public abstract class EntityMixin implements IEntity {
             ((IBlockPos) blockPos).worldportal$setPortal(this.worldportal$getPortalId());
         }
 
-        return original.call(instance, blockPos, isNether, worldBorder);
+        return blockPos;
     }
 
     @Override
