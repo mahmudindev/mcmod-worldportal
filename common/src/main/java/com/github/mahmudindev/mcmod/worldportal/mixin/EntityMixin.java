@@ -103,7 +103,7 @@ public abstract class EntityMixin implements IEntity {
 
     @Inject(method = "handlePortal", at = @At(value = "RETURN"))
     private void handlePortalChangeDimensionAfter(CallbackInfo ci) {
-        this.portalId = null;
+        this.worldportal$clear();
     }
 
     @Override
@@ -119,6 +119,11 @@ public abstract class EntityMixin implements IEntity {
     @Override
     public void worldportal$setPortal(ResourceLocation portalId) {
         this.portalId = portalId;
+    }
+
+    @Override
+    public void worldportal$clear() {
+        this.portalId = null;
     }
 
     @Override
