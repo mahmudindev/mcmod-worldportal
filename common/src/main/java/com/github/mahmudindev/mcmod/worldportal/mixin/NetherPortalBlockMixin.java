@@ -6,6 +6,7 @@ import com.github.mahmudindev.mcmod.worldportal.portal.PortalConfig;
 import com.github.mahmudindev.mcmod.worldportal.portal.PortalManager;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,14 +18,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.portal.PortalForcer;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Mixin(NetherPortalBlock.class)
 public abstract class NetherPortalBlockMixin {
@@ -132,22 +131,18 @@ public abstract class NetherPortalBlockMixin {
         return original.call(instance, blockGetter, blockPos, entityType);
     }
 
-    @WrapOperation(
+    @ModifyArg(
             method = "getExitPortal",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/portal/PortalForcer;findClosestPortalPosition(Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/level/border/WorldBorder;)Ljava/util/Optional;"
-            )
+            ),
+            index = 0
     )
-    private Optional<BlockPos> getExitPortalForcerFindPrepare(
-            PortalForcer instance,
+    private BlockPos getExitPortalForcerFindPrepare(
             BlockPos blockPos,
-            boolean isNether,
-            WorldBorder worldBorder,
-            Operation<Optional<BlockPos>> original,
-            ServerLevel serverLevel,
-            Entity entity,
-            BlockPos blockPos2
+            @Local(argsOnly = true) Entity entity,
+            @Local(argsOnly = true, ordinal = 0) BlockPos blockPos2
     ) {
         IEntity entityX = (IEntity) entity;
 
@@ -158,24 +153,21 @@ public abstract class NetherPortalBlockMixin {
             ((IBlockPos) blockPos).worldportal$setPortal(entityX.worldportal$getPortalId());
         }
 
-        return original.call(instance, blockPos, isNether, worldBorder);
+        return blockPos;
     }
 
-    @WrapOperation(
+    @ModifyArg(
             method = "getExitPortal",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/portal/PortalForcer;createPortal(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction$Axis;)Ljava/util/Optional;"
-            )
+            ),
+            index = 0
     )
-    private Optional<BlockUtil.FoundRectangle> getExitPortalForcerCreatePrepare(
-            PortalForcer instance,
+    private BlockPos getExitPortalForcerCreatePrepare(
             BlockPos blockPos,
-            Direction.Axis axis,
-            Operation<Optional<BlockUtil.FoundRectangle>> original,
-            ServerLevel serverLevel,
-            Entity entity,
-            BlockPos blockPos2
+            @Local(argsOnly = true) Entity entity,
+            @Local(argsOnly = true, ordinal = 0) BlockPos blockPos2
     ) {
         IEntity entityX = (IEntity) entity;
 
@@ -186,6 +178,6 @@ public abstract class NetherPortalBlockMixin {
             ((IBlockPos) blockPos).worldportal$setPortal(entityX.worldportal$getPortalId());
         }
 
-        return original.call(instance, blockPos, axis);
+        return blockPos;
     }
 }
