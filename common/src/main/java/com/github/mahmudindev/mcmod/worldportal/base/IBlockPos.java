@@ -19,4 +19,6 @@ public interface IBlockPos {
     PortalConfig worldportal$getPortalConfig();
 
     void worldportal$setPortal(Identifier portalId);
+
+    void worldportal$clear();
 }

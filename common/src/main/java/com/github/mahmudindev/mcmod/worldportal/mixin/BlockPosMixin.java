@@ -52,4 +52,11 @@ public abstract class BlockPosMixin implements IBlockPos {
     public void worldportal$setPortal(Identifier portalId) {
         this.portalId = portalId;
     }
+
+    @Override
+    public void worldportal$clear() {
+        this.level = null;
+        this.portalEntrancePos = null;
+        this.portalId = null;
+    }
 }
