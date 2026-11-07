@@ -63,8 +63,9 @@ public class PortalData extends SavedData {
     }
 
     public void removeBlock(BlockPos pos) {
-        this.blocks.remove(pos);
-        this.setDirty();
+        if (this.blocks.remove(pos) != null) {
+            this.setDirty();
+        }
     }
 
     public Map<BlockPos, ResourceKey<Level>> getDimensions() {
@@ -81,8 +82,9 @@ public class PortalData extends SavedData {
     }
 
     public void removeDimension(BlockPos pos) {
-        this.dimensions.remove(pos);
-        this.setDirty();
+        if (this.dimensions.remove(pos) != null) {
+            this.setDirty();
+        }
     }
 
     public static PortalData load(CompoundTag compoundTag) {
