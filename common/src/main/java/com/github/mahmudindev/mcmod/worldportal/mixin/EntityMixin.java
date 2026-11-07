@@ -15,9 +15,11 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.portal.DimensionTransition;
@@ -257,12 +259,38 @@ public abstract class EntityMixin implements IEntity {
             Map<BlockPos, ResourceKey<Level>> dimensions = portalData.getDimensions();
             for (Map.Entry<BlockPos, ResourceKey<Level>> entry : dimensions.entrySet()) {
                 BlockPos minCornerPosX = entry.getKey();
-                if (blockPos.distSqr(minCornerPosX) > 128) {
+
+                if (blockPos.distSqr(minCornerPosX) > Mth.square(128)) {
                     continue;
                 }
 
-                ResourceKey<Level> resourceKeyB = entry.getValue();
+                BlockState blockStateX = level.getBlockState(minCornerPosX);
+                if (blockStateX.is(Blocks.NETHER_PORTAL) || blockStateX.is(Blocks.END_PORTAL)) {
+                    boolean outside = true;
 
+                    for (int i = 0; i < foundRectangle.axis1Size; i++) {
+                        if (!outside) {
+                            break;
+                        }
+
+                        for (int j = 0; j < foundRectangle.axis2Size; j++) {
+                            if (minCornerPosX == minCornerPos.offset(
+                                    axis == Direction.Axis.X ? i : 0,
+                                    hasHA ? j : 0,
+                                    hasHA ? axis == Direction.Axis.Z ? i : 0 : j
+                            )) {
+                                outside = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (outside) {
+                        continue;
+                    }
+                }
+
+                ResourceKey<Level> resourceKeyB = entry.getValue();
                 for (Map.Entry<ResourceLocation, PortalConfig> entryX : portalConfigs.entrySet()) {
                     ResourceKey<Level> resourceKeyA = entryX.getValue().getDestinationKey();
                     if (resourceKeyX != resourceKeyA) {
@@ -303,6 +331,12 @@ public abstract class EntityMixin implements IEntity {
             }
         }
 
-        return hasHA ? originalKey : null;
+        if (hasHA) {
+            if (BaseFireBlockAccessor.invokeInPortalDimension(level)) {
+                return originalKey;
+            }
+        }
+
+        return null;
     }
 }
