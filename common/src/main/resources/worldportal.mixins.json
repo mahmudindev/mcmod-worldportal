@@ -6,6 +6,7 @@
   "client": [
   ],
   "mixins": [
+    "BaseFireBlockAccessor",
     "BaseFireBlockLMixin",
     "BaseFireBlockMixin",
     "BlockBehaviourMixin",

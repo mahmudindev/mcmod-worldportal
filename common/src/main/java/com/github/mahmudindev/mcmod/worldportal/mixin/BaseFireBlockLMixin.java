@@ -38,9 +38,7 @@ public abstract class BaseFireBlockLMixin {
                     continue;
                 }
 
-                if (portal.getDestinationKey() != level.dimension()) {
-                    inPortalDimension = true;
-                }
+                inPortalDimension = true;
             }
         }
 
