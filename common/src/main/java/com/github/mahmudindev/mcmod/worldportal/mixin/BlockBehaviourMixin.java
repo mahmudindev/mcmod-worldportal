@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Blocks;
@@ -34,11 +33,11 @@ public abstract class BlockBehaviourMixin {
             RandomSource random,
             CallbackInfoReturnable<BlockState> cir
     ) {
-        if (!state.is(Blocks.END_PORTAL)) {
+        if (!(level instanceof ServerLevel serverLevel)) {
             return;
         }
 
-        if (!(level instanceof LevelAccessor levelAccessor)) {
+        if (!state.is(Blocks.END_PORTAL)) {
             return;
         }
 
@@ -48,7 +47,7 @@ public abstract class BlockBehaviourMixin {
                 21,
                 Direction.Axis.Z,
                 21,
-                posX -> levelAccessor.getBlockState(posX) == state
+                posX -> serverLevel.getBlockState(posX) == state
         );
 
         boolean isComplete = true, isCustom = false;
@@ -67,7 +66,7 @@ public abstract class BlockBehaviourMixin {
                         continue;
                     }
 
-                    BlockState stateX = levelAccessor.getBlockState(entry.getKey());
+                    BlockState stateX = serverLevel.getBlockState(entry.getKey());
 
                     if (stateX.isAir()) {
                         isComplete = false;
@@ -88,18 +87,14 @@ public abstract class BlockBehaviourMixin {
             return;
         }
 
-        if (!(levelAccessor instanceof ServerLevel)) {
-            return;
-        }
-
-        IServerLevel serverLevelX = (IServerLevel) levelAccessor;
+        IServerLevel serverLevelX = (IServerLevel) serverLevel;
         PortalData portalData = serverLevelX.worldportal$getPortalData();
 
         for (int x = 0; x < largestRectangleAround.axis1Size; x++) {
             for (int z = 0; z < largestRectangleAround.axis2Size; z++) {
                 BlockPos posX = largestRectangleAround.minCorner.offset(x, 0, z);
 
-                levelAccessor.setBlock(posX, Blocks.AIR.defaultBlockState(), 18);
+                serverLevel.setBlock(posX, Blocks.AIR.defaultBlockState(), 18);
 
                 portalData.removeBlock(posX);
             }

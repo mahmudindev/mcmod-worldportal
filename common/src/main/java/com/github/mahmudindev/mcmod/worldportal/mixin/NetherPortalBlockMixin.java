@@ -63,13 +63,17 @@ public abstract class NetherPortalBlockMixin {
             RandomSource random,
             CallbackInfoReturnable<BlockState> cir
     ) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
         BlockState blockStateX = cir.getReturnValue();
 
         if (blockStateX.is((NetherPortalBlock)(Object) this)) {
             return;
         }
 
-        PortalData portalData = ((IServerLevel) level).worldportal$getPortalData();
+        PortalData portalData = ((IServerLevel) serverLevel).worldportal$getPortalData();
         portalData.removeBlock(pos);
     }
 
