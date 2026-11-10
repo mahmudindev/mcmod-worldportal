@@ -29,6 +29,10 @@ public abstract class BlockBehaviourMixin {
             BlockPos blockPos2,
             CallbackInfoReturnable<BlockState> cir
     ) {
+        if (!(levelAccessor instanceof ServerLevel)) {
+            return;
+        }
+
         if (!blockState.is(Blocks.END_PORTAL)) {
             return;
         }
@@ -76,10 +80,6 @@ public abstract class BlockBehaviourMixin {
         }
 
         if (isComplete || !isCustom) {
-            return;
-        }
-
-        if (!(levelAccessor instanceof ServerLevel)) {
             return;
         }
 

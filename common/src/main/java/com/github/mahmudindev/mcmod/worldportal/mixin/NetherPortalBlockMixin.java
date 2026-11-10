@@ -53,6 +53,10 @@ public abstract class NetherPortalBlockMixin {
             BlockPos blockPos2,
             CallbackInfoReturnable<BlockState> cir
     ) {
+        if (!(levelAccessor instanceof ServerLevel)) {
+            return;
+        }
+
         BlockState blockStateX = cir.getReturnValue();
 
         if (blockStateX.is((NetherPortalBlock)(Object) this)) {
